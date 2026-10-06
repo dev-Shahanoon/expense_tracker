@@ -1,0 +1,903 @@
+import 'package:flutter/material.dart';
+
+import '../models/account.dart';
+import '../services/database_service.dart';
+
+class AccountsScreen extends StatefulWidget {
+  final DatabaseService databaseService;
+
+  const AccountsScreen({
+    super.key,
+    required this.databaseService,
+  });
+
+  @override
+  State<AccountsScreen> createState() => _AccountsScreenState();
+}
+
+class _AccountsScreenState extends State<AccountsScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _nameController = TextEditingController();
+  final _bankController = TextEditingController();
+  final _balanceController = TextEditingController();
+  final _lastFourController = TextEditingController();
+
+  String _selectedType = 'Bank Account';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bankController.dispose();
+    _balanceController.dispose();
+    _lastFourController.dispose();
+    super.dispose();
+  }
+
+  double get _totalBalance {
+    return widget.databaseService.totalBalance;
+  }
+
+  String _formatAmount(double amount) {
+    return '₹${amount.toStringAsFixed(2)}';
+  }
+
+  IconData _accountIcon(String type) {
+    switch (type) {
+      case 'Bank Account':
+        return Icons.account_balance_rounded;
+      case 'Savings':
+        return Icons.savings_rounded;
+      case 'Cash':
+        return Icons.payments_rounded;
+      case 'Credit Card':
+        return Icons.credit_card_rounded;
+      case 'Wallet':
+        return Icons.account_balance_wallet_rounded;
+      default:
+        return Icons.account_balance_rounded;
+    }
+  }
+
+  Color _accountIconColor(BuildContext context, String type) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    switch (type) {
+      case 'Bank Account':
+        return colorScheme.primary;
+      case 'Savings':
+        return Colors.green;
+      case 'Cash':
+        return Colors.orange;
+      case 'Credit Card':
+        return Colors.redAccent;
+      case 'Wallet':
+        return Colors.purple;
+      default:
+        return colorScheme.primary;
+    }
+  }
+
+  void _showAddAccountSheet() {
+    _nameController.clear();
+    _bankController.clear();
+    _balanceController.clear();
+    _lastFourController.clear();
+
+    _selectedType = 'Bank Account';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
+
+            return Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 12,
+                bottom:
+                    MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.dividerColor,
+                            borderRadius:
+                                BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color:
+                                  colorScheme.primaryContainer,
+                              borderRadius:
+                                  BorderRadius.circular(15),
+                            ),
+                            child: Icon(
+                              Icons.account_balance_rounded,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Add Account',
+                                  style: theme
+                                      .textTheme.titleLarge
+                                      ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'Add a bank, wallet or cash account',
+                                  style: theme
+                                      .textTheme.bodySmall
+                                      ?.copyWith(
+                                    color: theme
+                                        .colorScheme.onSurface
+                                        .withValues(alpha: 0.65),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Account Name',
+                        style:
+                            theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _nameController,
+                        textInputAction:
+                            TextInputAction.next,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g. Main Account',
+                          prefixIcon: Icon(
+                            Icons.person_outline_rounded,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty) {
+                            return 'Please enter an account name';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Bank / Provider',
+                        style:
+                            theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _bankController,
+                        textInputAction:
+                            TextInputAction.next,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g. HDFC Bank',
+                          prefixIcon: Icon(
+                            Icons.account_balance_outlined,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty) {
+                            return 'Please enter bank or provider';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Account Type',
+                        style:
+                            theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedType,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.category_outlined,
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Bank Account',
+                            child: Text('Bank Account'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Savings',
+                            child: Text('Savings'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Cash',
+                            child: Text('Cash'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Credit Card',
+                            child: Text('Credit Card'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Wallet',
+                            child: Text('Wallet'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value == null) {
+                            return;
+                          }
+
+                          setSheetState(() {
+                            _selectedType = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Opening Balance',
+                        style:
+                            theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _balanceController,
+                        keyboardType:
+                            const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textInputAction:
+                            TextInputAction.next,
+                        decoration: const InputDecoration(
+                          hintText: '0.00',
+                          prefixIcon: Icon(
+                            Icons.currency_rupee_rounded,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty) {
+                            return 'Please enter opening balance';
+                          }
+
+                          final amount =
+                              double.tryParse(value.trim());
+
+                          if (amount == null) {
+                            return 'Enter a valid amount';
+                          }
+
+                          if (amount < 0) {
+                            return 'Balance cannot be negative';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Last 4 Digits',
+                        style:
+                            theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _lastFourController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        textInputAction:
+                            TextInputAction.done,
+                        decoration: const InputDecoration(
+                          hintText: 'Optional',
+                          prefixIcon: Icon(
+                            Icons.password_rounded,
+                          ),
+                          counterText: '',
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty) {
+                            return null;
+                          }
+
+                          if (value.trim().length != 4) {
+                            return 'Enter exactly 4 digits';
+                          }
+
+                          if (int.tryParse(value.trim()) ==
+                              null) {
+                            return 'Enter numbers only';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: FilledButton.icon(
+                          onPressed: _saveAccount,
+                          icon: const Icon(
+                            Icons.add_rounded,
+                          ),
+                          label: const Text(
+                            'Add Account',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _saveAccount() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final account = Account(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      name: _nameController.text.trim(),
+      bankName: _bankController.text.trim(),
+      type: _selectedType,
+      openingBalance:
+          double.parse(_balanceController.text.trim()),
+      lastFourDigits:
+          _lastFourController.text.trim().isEmpty
+              ? null
+              : _lastFourController.text.trim(),
+    );
+
+    await widget.databaseService.addAccount(account);
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pop();
+
+    setState(() {});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Account added successfully',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount(Account account) async {
+    final accountTransactions =
+        widget.databaseService.getAccountTransactions(
+      account.id,
+    );
+
+    if (accountTransactions.isNotEmpty) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Cannot delete "${account.name}" because it '
+            'has ${accountTransactions.length} '
+            '${accountTransactions.length == 1 ? 'transaction' : 'transactions'}.',
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+
+        return AlertDialog(
+          title: const Text('Delete Account?'),
+          content: Text(
+            'Are you sure you want to delete "${account.name}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor:
+                    theme.colorScheme.error,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await widget.databaseService.deleteAccount(
+      account.id,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${account.name} deleted',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTotalBalanceCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: colorScheme.primary,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.onPrimary.withValues(
+                    alpha: 0.14,
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: colorScheme.onPrimary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Total Balance',
+                style:
+                    theme.textTheme.titleMedium?.copyWith(
+                  color:
+                      colorScheme.onPrimary.withValues(
+                    alpha: 0.9,
+                  ),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _formatAmount(_totalBalance),
+            style:
+                theme.textTheme.headlineMedium?.copyWith(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${widget.databaseService.accounts.length} '
+            '${widget.databaseService.accounts.length == 1 ? 'account' : 'accounts'}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color:
+                  colorScheme.onPrimary.withValues(
+                alpha: 0.75,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountCard(
+    BuildContext context,
+    Account account,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final balance =
+        widget.databaseService.getAccountBalance(
+      account.id,
+    );
+
+    final iconColor =
+        _accountIconColor(context, account.type);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color:
+                        iconColor.withValues(alpha: 0.12),
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    _accountIcon(account.type),
+                    color: iconColor,
+                    size: 25,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        maxLines: 1,
+                        overflow:
+                            TextOverflow.ellipsis,
+                        style: theme
+                            .textTheme.titleMedium
+                            ?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        account.bankName,
+                        maxLines: 1,
+                        overflow:
+                            TextOverflow.ellipsis,
+                        style: theme
+                            .textTheme.bodySmall
+                            ?.copyWith(
+                          color: colorScheme.onSurface
+                              .withValues(alpha: 0.65),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  tooltip: 'Account options',
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _deleteAccount(account);
+                    }
+                  },
+                  itemBuilder: (context) {
+                    return const [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.red,
+                            ),
+                            SizedBox(width: 10),
+                            Text('Delete'),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.45),
+                borderRadius:
+                    BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          account.type,
+                          style: theme
+                              .textTheme.bodySmall
+                              ?.copyWith(
+                            color:
+                                colorScheme.onSurface
+                                    .withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          account.lastFourDigits == null
+                              ? 'Account'
+                              : '•••• ${account.lastFourDigits}',
+                          style: theme
+                              .textTheme.bodyMedium
+                              ?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Balance',
+                        style: theme
+                            .textTheme.bodySmall
+                            ?.copyWith(
+                          color: colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        _formatAmount(balance),
+                        style: theme
+                            .textTheme.titleMedium
+                            ?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 38,
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.account_balance_wallet_outlined,
+                size: 34,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'No accounts yet',
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add your first account to start tracking '
+              'your balance and transactions.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(
+                color: colorScheme.onSurface
+                    .withValues(alpha: 0.65),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 22),
+            FilledButton.icon(
+              onPressed: _showAddAccountSheet,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Account'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accounts = widget.databaseService.accounts;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Accounts',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {});
+          },
+          child: ListView(
+            physics:
+                const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              110,
+            ),
+            children: [
+              _buildTotalBalanceCard(context),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Your Accounts',
+                      style: theme.textTheme.titleLarge
+                          ?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${accounts.length}',
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(
+                      color: theme
+                          .colorScheme.onSurface
+                          .withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (accounts.isEmpty)
+                _buildEmptyState(context)
+              else
+                ...accounts.map(
+                  (account) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 12,
+                    ),
+                    child: _buildAccountCard(
+                      context,
+                      account,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton:
+          FloatingActionButton.extended(
+        onPressed: _showAddAccountSheet,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Add Account',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
