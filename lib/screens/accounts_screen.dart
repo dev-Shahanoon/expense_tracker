@@ -100,14 +100,14 @@ class _AccountsScreenState extends State<AccountsScreen> {
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
-                top: 12,
+                top: 10,
                 bottom:
                     MediaQuery.of(context).viewInsets.bottom + 20,
               ),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
+                  top: Radius.circular(30),
                 ),
               ),
               child: SingleChildScrollView(
@@ -119,24 +119,24 @@ class _AccountsScreenState extends State<AccountsScreen> {
                     children: [
                       Center(
                         child: Container(
-                          width: 42,
+                          width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: theme.dividerColor,
+                            color: colorScheme.outlineVariant,
                             borderRadius:
                                 BorderRadius.circular(20),
                           ),
                         ),
                       ),
                       const SizedBox(height: 22),
+
                       Row(
                         children: [
                           Container(
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color:
-                                  colorScheme.primaryContainer,
+                              color: colorScheme.primaryContainer,
                               borderRadius:
                                   BorderRadius.circular(15),
                             ),
@@ -154,20 +154,22 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                 Text(
                                   'Add Account',
                                   style: theme
-                                      .textTheme.titleLarge
+                                      .textTheme
+                                      .titleLarge
                                       ?.copyWith(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
                                   ),
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
                                   'Add a bank, wallet or cash account',
                                   style: theme
-                                      .textTheme.bodySmall
+                                      .textTheme
+                                      .bodySmall
                                       ?.copyWith(
-                                    color: theme
-                                        .colorScheme.onSurface
-                                        .withValues(alpha: 0.65),
+                                    color: colorScheme.onSurface
+                                        .withValues(alpha: 0.55),
                                   ),
                                 ),
                               ],
@@ -175,19 +177,18 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      Text(
+
+                      const SizedBox(height: 26),
+
+                      _buildFieldLabel(
+                        context,
                         'Account Name',
-                        style:
-                            theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       const SizedBox(height: 8),
+
                       TextFormField(
                         controller: _nameController,
-                        textInputAction:
-                            TextInputAction.next,
+                        textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           hintText: 'e.g. Main Account',
                           prefixIcon: Icon(
@@ -203,19 +204,18 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      Text(
+
+                      const SizedBox(height: 17),
+
+                      _buildFieldLabel(
+                        context,
                         'Bank / Provider',
-                        style:
-                            theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       const SizedBox(height: 8),
+
                       TextFormField(
                         controller: _bankController,
-                        textInputAction:
-                            TextInputAction.next,
+                        textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           hintText: 'e.g. HDFC Bank',
                           prefixIcon: Icon(
@@ -231,15 +231,15 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      Text(
+
+                      const SizedBox(height: 17),
+
+                      _buildFieldLabel(
+                        context,
                         'Account Type',
-                        style:
-                            theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       const SizedBox(height: 8),
+
                       DropdownButtonFormField<String>(
                         initialValue: _selectedType,
                         decoration: const InputDecoration(
@@ -279,23 +279,22 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           });
                         },
                       ),
-                      const SizedBox(height: 16),
-                      Text(
+
+                      const SizedBox(height: 17),
+
+                      _buildFieldLabel(
+                        context,
                         'Opening Balance',
-                        style:
-                            theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       const SizedBox(height: 8),
+
                       TextFormField(
                         controller: _balanceController,
                         keyboardType:
                             const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        textInputAction:
-                            TextInputAction.next,
+                        textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           hintText: '0.00',
                           prefixIcon: Icon(
@@ -322,21 +321,20 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      Text(
+
+                      const SizedBox(height: 17),
+
+                      _buildFieldLabel(
+                        context,
                         'Last 4 Digits',
-                        style:
-                            theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       const SizedBox(height: 8),
+
                       TextFormField(
                         controller: _lastFourController,
                         keyboardType: TextInputType.number,
                         maxLength: 4,
-                        textInputAction:
-                            TextInputAction.done,
+                        textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(
                           hintText: 'Optional',
                           prefixIcon: Icon(
@@ -354,15 +352,16 @@ class _AccountsScreenState extends State<AccountsScreen> {
                             return 'Enter exactly 4 digits';
                           }
 
-                          if (int.tryParse(value.trim()) ==
-                              null) {
+                          if (int.tryParse(value.trim()) == null) {
                             return 'Enter numbers only';
                           }
 
                           return null;
                         },
                       ),
-                      const SizedBox(height: 24),
+
+                      const SizedBox(height: 26),
+
                       SizedBox(
                         width: double.infinity,
                         height: 54,
@@ -374,7 +373,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           label: const Text(
                             'Add Account',
                             style: TextStyle(
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
@@ -387,6 +386,19 @@ class _AccountsScreenState extends State<AccountsScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildFieldLabel(
+    BuildContext context,
+    String text,
+  ) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.1,
+          ),
     );
   }
 
@@ -471,8 +483,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor:
-                    theme.colorScheme.error,
+                backgroundColor: theme.colorScheme.error,
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop(true);
@@ -509,70 +520,78 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
   Widget _buildTotalBalanceCard(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardColor = isDark
+        ? const Color(0xFF182235)
+        : const Color(0xFF17243A);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(23),
       decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(24),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(26),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
-                  color:
-                      colorScheme.onPrimary.withValues(
-                    alpha: 0.14,
-                  ),
-                  borderRadius:
-                      BorderRadius.circular(13),
+                  color: Colors.white.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.account_balance_wallet_rounded,
-                  color: colorScheme.onPrimary,
+                  color: Colors.white,
+                  size: 21,
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Total Balance',
-                style:
-                    theme.textTheme.titleMedium?.copyWith(
-                  color:
-                      colorScheme.onPrimary.withValues(
-                    alpha: 0.9,
+              Expanded(
+                child: Text(
+                  'Total Balance',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.82),
+                    fontWeight: FontWeight.w600,
                   ),
-                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '${widget.databaseService.accounts.length}',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.65),
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 20),
+
           Text(
             _formatAmount(_totalBalance),
-            style:
-                theme.textTheme.headlineMedium?.copyWith(
-              color: colorScheme.onPrimary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.8,
             ),
           ),
-          const SizedBox(height: 6),
+
+          const SizedBox(height: 7),
+
           Text(
-            '${widget.databaseService.accounts.length} '
-            '${widget.databaseService.accounts.length == 1 ? 'account' : 'accounts'}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color:
-                  colorScheme.onPrimary.withValues(
-                alpha: 0.75,
-              ),
+            widget.databaseService.accounts.length == 1
+                ? '1 account connected'
+                : '${widget.databaseService.accounts.length} accounts connected',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.58),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -588,39 +607,52 @@ class _AccountsScreenState extends State<AccountsScreen> {
     final colorScheme = theme.colorScheme;
 
     final balance =
-        widget.databaseService.getAccountBalance(
-      account.id,
-    );
+        widget.databaseService.getAccountBalance(account.id);
 
     final iconColor =
         _accountIconColor(context, account.type);
 
     return Card(
       margin: EdgeInsets.zero,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: theme.brightness == Brightness.dark
+                ? 0.20
+                : 0.35,
+          ),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.fromLTRB(
+          17,
+          17,
+          12,
+          17,
+        ),
         child: Column(
           children: [
             Row(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color:
-                        iconColor.withValues(alpha: 0.12),
-                    borderRadius:
-                        BorderRadius.circular(16),
+                    color: iconColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(
                     _accountIcon(account.type),
                     color: iconColor,
-                    size: 25,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 14),
+
+                const SizedBox(width: 13),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment:
@@ -629,32 +661,35 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       Text(
                         account.name,
                         maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: theme
-                            .textTheme.titleMedium
-                            ?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.1,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         account.bankName,
                         maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: theme
-                            .textTheme.bodySmall
-                            ?.copyWith(
-                          color: colorScheme.onSurface
-                              .withValues(alpha: 0.65),
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(
+                            alpha: 0.55,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
+
                 PopupMenuButton<String>(
                   tooltip: 'Account options',
+                  icon: Icon(
+                    Icons.more_horiz_rounded,
+                    color: colorScheme.onSurface.withValues(
+                      alpha: 0.55,
+                    ),
+                  ),
                   onSelected: (value) {
                     if (value == 'delete') {
                       _deleteAccount(account);
@@ -680,16 +715,19 @@ class _AccountsScreenState extends State<AccountsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+
+            const SizedBox(height: 16),
+
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 15,
+                vertical: 14,
+              ),
               decoration: BoxDecoration(
-                color: colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.45),
-                borderRadius:
-                    BorderRadius.circular(16),
+                color: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
@@ -700,50 +738,55 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       children: [
                         Text(
                           account.type,
-                          style: theme
-                              .textTheme.bodySmall
-                              ?.copyWith(
-                            color:
-                                colorScheme.onSurface
-                                    .withValues(
-                              alpha: 0.6,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(
+                              alpha: 0.55,
                             ),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 4),
                         Text(
                           account.lastFourDigits == null
                               ? 'Account'
                               : '•••• ${account.lastFourDigits}',
-                          style: theme
-                              .textTheme.bodyMedium
-                              ?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
                   ),
+
+                  Container(
+                    width: 1,
+                    height: 30,
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: 0.35,
+                    ),
+                  ),
+
+                  const SizedBox(width: 15),
+
                   Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.end,
                     children: [
                       Text(
                         'Balance',
-                        style: theme
-                            .textTheme.bodySmall
-                            ?.copyWith(
-                          color: colorScheme.onSurface
-                              .withValues(alpha: 0.6),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(
+                            alpha: 0.55,
+                          ),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 4),
                       Text(
                         _formatAmount(balance),
-                        style: theme
-                            .textTheme.titleMedium
-                            ?.copyWith(
-                          fontWeight: FontWeight.w800,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.2,
                         ),
                       ),
                     ],
@@ -761,55 +804,75 @@ class _AccountsScreenState extends State<AccountsScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 38,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 42,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.28,
         ),
-        child: Column(
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 34,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'No accounts yet',
-              style: theme.textTheme.titleLarge
-                  ?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add your first account to start tracking '
-              'your balance and transactions.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(
-                color: colorScheme.onSurface
-                    .withValues(alpha: 0.65),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 22),
-            FilledButton.icon(
-              onPressed: _showAddAccountSheet,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add Account'),
-            ),
-          ],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: 0.25,
+          ),
         ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 33,
+              color: colorScheme.primary,
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          Text(
+            'No accounts yet',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Add your first account to start tracking '
+            'your balance and transactions.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withValues(
+                alpha: 0.58,
+              ),
+              height: 1.45,
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          FilledButton.icon(
+            onPressed: _showAddAccountSheet,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Add Account',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -824,7 +887,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
         title: const Text(
           'Accounts',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
           ),
         ),
       ),
@@ -834,8 +898,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
             setState(() {});
           },
           child: ListView(
-            physics:
-                const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(
               16,
               8,
@@ -844,31 +907,42 @@ class _AccountsScreenState extends State<AccountsScreen> {
             ),
             children: [
               _buildTotalBalanceCard(context),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 26),
+
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       'Your Accounts',
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
                       ),
                     ),
                   ),
-                  Text(
-                    '${accounts.length}',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(
-                      color: theme
-                          .colorScheme.onSurface
-                          .withValues(alpha: 0.6),
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${accounts.length}',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
+
               if (accounts.isEmpty)
                 _buildEmptyState(context)
               else
@@ -887,14 +961,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
           ),
         ),
       ),
-      floatingActionButton:
-          FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddAccountSheet,
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Add Account',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),

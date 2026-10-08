@@ -35,6 +35,10 @@ class _AddTransactionScreenState
 
   DateTime _selectedDate = DateTime.now();
 
+  static const Color _expenseColor = Color(0xFFE5484D);
+  static const Color _incomeColor = Color(0xFF16A34A);
+  static const Color _transferColor = Color(0xFF2563EB);
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +70,19 @@ class _AddTransactionScreenState
     return expenseCategories;
   }
 
+  Color _typeColor() {
+    switch (_type) {
+      case TransactionType.expense:
+        return _expenseColor;
+
+      case TransactionType.income:
+        return _incomeColor;
+
+      case TransactionType.transfer:
+        return _transferColor;
+    }
+  }
+
   String _formatDate(DateTime date) {
     const months = [
       'January',
@@ -86,9 +103,17 @@ class _AddTransactionScreenState
   }
 
   String _formatTime(DateTime date) {
-    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-    final minute = date.minute.toString().padLeft(2, '0');
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+    final hour = date.hour % 12 == 0
+        ? 12
+        : date.hour % 12;
+
+    final minute = date.minute
+        .toString()
+        .padLeft(2, '0');
+
+    final period = date.hour >= 12
+        ? 'PM'
+        : 'AM';
 
     return '$hour:$minute $period';
   }
@@ -100,16 +125,19 @@ class _AddTransactionScreenState
       _selectedToAccountId = null;
 
       if (type == TransactionType.expense) {
-        _selectedCategoryId = expenseCategories.first.id;
+        _selectedCategoryId =
+            expenseCategories.first.id;
       }
 
       if (type == TransactionType.income) {
-        _selectedCategoryId = incomeSources.first.id;
+        _selectedCategoryId =
+            incomeSources.first.id;
       }
 
       if (_accounts.isNotEmpty &&
           _selectedAccountId == null) {
-        _selectedAccountId = _accounts.first.id;
+        _selectedAccountId =
+            _accounts.first.id;
       }
     });
   }
@@ -140,7 +168,8 @@ class _AddTransactionScreenState
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      initialTime:
+          TimeOfDay.fromDateTime(_selectedDate),
     );
 
     if (picked == null || !mounted) {
@@ -225,9 +254,10 @@ class _AddTransactionScreenState
       categoryId:
           _selectedCategoryId ?? 'transfer',
       accountId: _selectedAccountId!,
-      toAccountId: _type == TransactionType.transfer
-          ? _selectedToAccountId
-          : null,
+      toAccountId:
+          _type == TransactionType.transfer
+              ? _selectedToAccountId
+              : null,
       note: _noteController.text.trim(),
       date: _selectedDate,
     );
@@ -245,9 +275,23 @@ class _AddTransactionScreenState
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
         content: Text(message),
       ),
     );
+  }
+
+  String _saveButtonText() {
+    switch (_type) {
+      case TransactionType.income:
+        return 'Save Income';
+
+      case TransactionType.expense:
+        return 'Save Expense';
+
+      case TransactionType.transfer:
+        return 'Save Transfer';
+    }
   }
 
   Widget _buildTypeSelector(BuildContext context) {
@@ -258,8 +302,12 @@ class _AddTransactionScreenState
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(18),
+            .withValues(alpha: 0.40),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outlineVariant
+              .withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         children: [
@@ -302,21 +350,40 @@ class _AddTransactionScreenState
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     final selected = _type == type;
+
+    Color selectedColor;
+
+    switch (type) {
+      case TransactionType.expense:
+        selectedColor = _expenseColor;
+        break;
+
+      case TransactionType.income:
+        selectedColor = _incomeColor;
+        break;
+
+      case TransactionType.transfer:
+        selectedColor = _transferColor;
+        break;
+    }
 
     return GestureDetector(
       onTap: () => _changeType(type),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration:
+            const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(
-          vertical: 12,
+          vertical: 13,
           horizontal: 6,
         ),
         decoration: BoxDecoration(
           color: selected
-              ? colorScheme.primary
+              ? selectedColor
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Column(
           children: [
@@ -324,21 +391,22 @@ class _AddTransactionScreenState
               icon,
               size: 20,
               color: selected
-                  ? colorScheme.onPrimary
+                  ? Colors.white
                   : colorScheme.onSurface
-                      .withValues(alpha: 0.65),
+                      .withValues(alpha: 0.58),
             ),
             const SizedBox(height: 5),
             Text(
               label,
-              style: theme.textTheme.labelMedium?.copyWith(
+              style:
+                  theme.textTheme.labelMedium?.copyWith(
                 color: selected
-                    ? colorScheme.onPrimary
+                    ? Colors.white
                     : colorScheme.onSurface
-                        .withValues(alpha: 0.7),
+                        .withValues(alpha: 0.70),
                 fontWeight: selected
-                    ? FontWeight.w700
-                    : FontWeight.w500,
+                    ? FontWeight.w800
+                    : FontWeight.w600,
               ),
             ),
           ],
@@ -349,46 +417,74 @@ class _AddTransactionScreenState
 
   Widget _buildAmountField(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final color = _typeColor();
 
-    return Container(
-      padding: const EdgeInsets.all(20),
+    return AnimatedContainer(
+      duration:
+          const Duration(milliseconds: 180),
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        18,
+        20,
+        16,
+      ),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer
-            .withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(22),
+        color: color.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: color.withValues(alpha: 0.16),
+        ),
       ),
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          Text(
-            'Amount',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.currency_rupee_rounded,
+                size: 17,
+                color: color,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'Amount',
+                style:
+                    theme.textTheme.labelLarge?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           TextFormField(
             controller: _amountController,
+            autofocus: true,
             keyboardType:
                 const TextInputType.numberWithOptions(
               decimal: true,
             ),
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+            style:
+                theme.textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1,
             ),
             decoration: InputDecoration(
               hintText: '0.00',
               prefixText: '₹ ',
               prefixStyle:
-                  theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+                  theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1,
+                color: color,
               ),
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
               contentPadding: EdgeInsets.zero,
             ),
             validator: (value) {
@@ -426,14 +522,18 @@ class _AddTransactionScreenState
       padding: const EdgeInsets.only(bottom: 9),
       child: Text(
         title,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
+        style:
+            theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.1,
         ),
       ),
     );
   }
 
-  Widget _buildAccountSelector(BuildContext context) {
+  Widget _buildAccountSelector(
+    BuildContext context,
+  ) {
     final accounts = _accounts;
 
     return DropdownButtonFormField<String>(
@@ -483,7 +583,7 @@ class _AddTransactionScreenState
       initialValue: _selectedToAccountId,
       decoration: const InputDecoration(
         prefixIcon: Icon(
-          Icons.account_balance_rounded,
+          Icons.account_balance_outlined,
         ),
         hintText: 'Select destination account',
       ),
@@ -511,7 +611,9 @@ class _AddTransactionScreenState
     );
   }
 
-  Widget _buildCategorySelector(BuildContext context) {
+  Widget _buildCategorySelector(
+    BuildContext context,
+  ) {
     final categories = _currentCategories;
 
     return DropdownButtonFormField<String>(
@@ -533,9 +635,8 @@ class _AddTransactionScreenState
             children: [
               Text(
                 category.icon,
-                style: const TextStyle(
-                  fontSize: 18,
-                ),
+                style:
+                    const TextStyle(fontSize: 18),
               ),
               const SizedBox(width: 10),
               Text(category.name),
@@ -560,7 +661,11 @@ class _AddTransactionScreenState
     );
   }
 
-  Widget _buildDateTimeCard(BuildContext context) {
+  Widget _buildDateTimeCard(
+    BuildContext context,
+  ) {
+    final color = _typeColor();
+
     return Row(
       children: [
         Expanded(
@@ -569,16 +674,18 @@ class _AddTransactionScreenState
             icon: Icons.calendar_today_rounded,
             title: 'Date',
             value: _formatDate(_selectedDate),
+            color: color,
             onTap: _pickDate,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildDateTimeButton(
             context,
             icon: Icons.access_time_rounded,
             title: 'Time',
             value: _formatTime(_selectedDate),
+            color: color,
             onTap: _pickTime,
           ),
         ),
@@ -591,62 +698,85 @@ class _AddTransactionScreenState
     required IconData icon,
     required String title,
     required String value,
+    required Color color,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: colorScheme.surfaceContainerHighest
+          .withValues(alpha: 0.30),
       borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest
-              .withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 21,
-              color: colorScheme.primary,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: color.withValues(alpha: 0.11),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style:
-                        theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color:
+                      color.withValues(alpha: 0.09),
+                  borderRadius:
+                      BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme
+                          .textTheme.labelSmall
+                          ?.copyWith(
+                        color: colorScheme.onSurface
+                            .withValues(alpha: 0.52),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow:
+                          TextOverflow.ellipsis,
+                      style: theme
+                          .textTheme.bodySmall
+                          ?.copyWith(
+                        fontWeight:
+                            FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTransferInfo(BuildContext context) {
+  Widget _buildTransferInfo(
+    BuildContext context,
+  ) {
     if (_type != TransactionType.transfer ||
         _selectedAccountId == null ||
         _selectedToAccountId == null) {
@@ -654,33 +784,108 @@ class _AddTransactionScreenState
     }
 
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer
-            .withValues(alpha: 0.35),
+        color:
+            _transferColor.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color:
+              _transferColor.withValues(alpha: 0.14),
+        ),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.swap_horiz_rounded,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '${_accountName(_selectedAccountId!)} → '
-              '${_accountName(_selectedToAccountId!)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: _transferColor.withValues(
+                alpha: 0.10,
               ),
+              borderRadius:
+                  BorderRadius.circular(11),
+            ),
+            child: const Icon(
+              Icons.swap_horiz_rounded,
+              color: _transferColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Transfer route',
+                  style: theme
+                      .textTheme.labelSmall
+                      ?.copyWith(
+                    color: theme
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.50),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${_accountName(_selectedAccountId!)} → '
+                  '${_accountName(_selectedToAccountId!)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme
+                      .textTheme.bodySmall
+                      ?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSaveButton(
+    BuildContext context,
+  ) {
+    final color = _typeColor();
+
+    return SizedBox(
+      height: 56,
+      width: double.infinity,
+      child: FilledButton.icon(
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor:
+              color.withValues(alpha: 0.35),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(18),
+          ),
+        ),
+        onPressed:
+            _accounts.isNotEmpty
+                ? _saveTransaction
+                : null,
+        icon: const Icon(
+          Icons.check_rounded,
+        ),
+        label: Text(
+          _saveButtonText(),
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+          ),
+        ),
       ),
     );
   }
@@ -697,7 +902,8 @@ class _AddTransactionScreenState
         title: const Text(
           'Add Transaction',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
           ),
         ),
       ),
@@ -714,11 +920,11 @@ class _AddTransactionScreenState
             children: [
               _buildTypeSelector(context),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               _buildAmountField(context),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 25),
 
               _buildSectionTitle(
                 context,
@@ -727,26 +933,33 @@ class _AddTransactionScreenState
 
               if (!hasAccounts)
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  padding:
+                      const EdgeInsets.all(17),
                   decoration: BoxDecoration(
-                    color: colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(18),
+                    color:
+                        colorScheme.errorContainer,
+                    borderRadius:
+                        BorderRadius.circular(18),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        Icons.warning_amber_rounded,
-                        color: colorScheme.onErrorContainer,
+                        Icons
+                            .warning_amber_rounded,
+                        color: colorScheme
+                            .onErrorContainer,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'No accounts available. '
                           'Please add an account first.',
-                          style:
-                              theme.textTheme.bodyMedium?.copyWith(
-                            color:
-                                colorScheme.onErrorContainer,
+                          style: theme
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                            color: colorScheme
+                                .onErrorContainer,
                           ),
                         ),
                       ),
@@ -756,35 +969,42 @@ class _AddTransactionScreenState
               else
                 _buildAccountSelector(context),
 
-              if (_type == TransactionType.transfer) ...[
-                const SizedBox(height: 18),
+              if (_type ==
+                  TransactionType.transfer) ...[
+                const SizedBox(height: 20),
 
                 _buildSectionTitle(
                   context,
                   'Destination Account',
                 ),
 
-                _buildDestinationSelector(context),
+                _buildDestinationSelector(
+                  context,
+                ),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 13),
 
                 _buildTransferInfo(context),
               ],
 
-              if (_type != TransactionType.transfer) ...[
+              if (_type !=
+                  TransactionType.transfer) ...[
                 const SizedBox(height: 20),
 
                 _buildSectionTitle(
                   context,
-                  _type == TransactionType.income
+                  _type ==
+                          TransactionType.income
                       ? 'Income Source'
                       : 'Category',
                 ),
 
-                _buildCategorySelector(context),
+                _buildCategorySelector(
+                  context,
+                ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 25),
 
               _buildSectionTitle(
                 context,
@@ -793,7 +1013,7 @@ class _AddTransactionScreenState
 
               _buildDateTimeCard(context),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 25),
 
               _buildSectionTitle(
                 context,
@@ -806,7 +1026,8 @@ class _AddTransactionScreenState
                 maxLines: 4,
                 textCapitalization:
                     TextCapitalization.sentences,
-                decoration: const InputDecoration(
+                decoration:
+                    const InputDecoration(
                   hintText:
                       'Add a note (optional)',
                   prefixIcon: Padding(
@@ -822,30 +1043,7 @@ class _AddTransactionScreenState
 
               const SizedBox(height: 28),
 
-              SizedBox(
-                height: 56,
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed:
-                      hasAccounts
-                          ? _saveTransaction
-                          : null,
-                  icon: const Icon(
-                    Icons.check_rounded,
-                  ),
-                  label: Text(
-                    _type == TransactionType.transfer
-                        ? 'Save Transfer'
-                        : _type ==
-                                TransactionType.income
-                            ? 'Save Income'
-                            : 'Save Expense',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
+              _buildSaveButton(context),
             ],
           ),
         ),

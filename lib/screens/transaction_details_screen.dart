@@ -29,13 +29,11 @@ class TransactionDetailsScreen extends StatelessWidget {
             : date.hour;
 
     final minute = date.minute.toString().padLeft(2, '0');
-
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year} • '
-        '$hour:$minute $period';
+        '${date.year} • $hour:$minute $period';
   }
 
   String _getAccountName(String accountId) {
@@ -175,11 +173,13 @@ class TransactionDetailsScreen extends StatelessWidget {
   Future<void> _editTransaction(
     BuildContext context,
   ) async {
-    final result = await showModalBottomSheet<TransactionModel>(
+    final result =
+        await showModalBottomSheet<TransactionModel>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor:
+          Theme.of(context).scaffoldBackgroundColor,
       builder: (sheetContext) {
         return _EditTransactionSheet(
           databaseService: databaseService,
@@ -212,22 +212,26 @@ class TransactionDetailsScreen extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(16),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant
+              .withValues(alpha: 0.45),
+        ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary
-                  .withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
+                  .withValues(alpha: 0.09),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               icon,
@@ -244,8 +248,11 @@ class TransactionDetailsScreen extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: theme
+                        .colorScheme
+                        .onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -255,7 +262,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -265,8 +272,10 @@ class TransactionDetailsScreen extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                      color: theme
+                          .colorScheme
+                          .onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -274,6 +283,43 @@ class TransactionDetailsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool destructive = false,
+  }) {
+    final colorScheme =
+        Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 50,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          size: 20,
+        ),
+        label: Text(label),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: destructive
+              ? colorScheme.error
+              : colorScheme.onSurface,
+          side: BorderSide(
+            color: destructive
+                ? colorScheme.error
+                    .withValues(alpha: 0.35)
+                : colorScheme.outlineVariant,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
       ),
     );
   }
@@ -314,38 +360,46 @@ class TransactionDetailsScreen extends StatelessWidget {
               Icons.delete_outline_rounded,
             ),
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
             16,
+            10,
             16,
-            16,
-            32,
+            30,
           ),
           children: [
+            // =================================================
+            // MAIN SUMMARY
+            // =================================================
+
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 28,
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                26,
+                20,
+                24,
               ),
               decoration: BoxDecoration(
-                color: transactionColor.withValues(
-                  alpha: 0.10,
-                ),
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: transactionColor
+                      .withValues(alpha: 0.22),
+                ),
               ),
               child: Column(
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 68,
+                    height: 68,
                     decoration: BoxDecoration(
-                      color: transactionColor.withValues(
-                        alpha: 0.14,
-                      ),
+                      color: transactionColor
+                          .withValues(alpha: 0.10),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -354,48 +408,77 @@ class TransactionDetailsScreen extends StatelessWidget {
                       size: 32,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _getTransactionType(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: transactionColor,
+
+                  const SizedBox(height: 15),
+
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: transactionColor
+                          .withValues(alpha: 0.10),
+                      borderRadius:
+                          BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      _getTransactionType(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: transactionColor,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getAmountText(),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: transactionColor,
+
+                  const SizedBox(height: 12),
+
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _getAmountText(),
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        color: transactionColor,
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 8),
+
                   Text(
                     _formatDateTime(transaction.date),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                      color: theme
+                          .colorScheme
+                          .onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             const Text(
               'Details',
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
               ),
             ),
 
             const SizedBox(height: 12),
+
+            // =================================================
+            // CATEGORY
+            // =================================================
 
             _buildDetailTile(
               context: context,
@@ -413,6 +496,10 @@ class TransactionDetailsScreen extends StatelessWidget {
                     ),
             ),
 
+            // =================================================
+            // SOURCE ACCOUNT
+            // =================================================
+
             _buildDetailTile(
               context: context,
               icon: Icons.account_balance_rounded,
@@ -426,6 +513,10 @@ class TransactionDetailsScreen extends StatelessWidget {
                 transaction.accountId,
               ),
             ),
+
+            // =================================================
+            // DESTINATION ACCOUNT
+            // =================================================
 
             if (isTransfer &&
                 transaction.toAccountId != null)
@@ -441,6 +532,10 @@ class TransactionDetailsScreen extends StatelessWidget {
                 ),
               ),
 
+            // =================================================
+            // DATE
+            // =================================================
+
             _buildDetailTile(
               context: context,
               icon: Icons.schedule_rounded,
@@ -450,6 +545,10 @@ class TransactionDetailsScreen extends StatelessWidget {
               ),
             ),
 
+            // =================================================
+            // NOTE
+            // =================================================
+
             if (transaction.note.trim().isNotEmpty)
               _buildDetailTile(
                 context: context,
@@ -458,38 +557,31 @@ class TransactionDetailsScreen extends StatelessWidget {
                 value: transaction.note,
               ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            SizedBox(
-              height: 52,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  _editTransaction(context);
-                },
-                icon: const Icon(
-                  Icons.edit_outlined,
-                ),
-                label: const Text(
-                  'Edit Transaction',
-                ),
-              ),
+            // =================================================
+            // ACTIONS
+            // =================================================
+
+            _buildActionButton(
+              context: context,
+              icon: Icons.edit_outlined,
+              label: 'Edit Transaction',
+              onPressed: () {
+                _editTransaction(context);
+              },
             ),
 
             const SizedBox(height: 10),
 
-            SizedBox(
-              height: 52,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  _deleteTransaction(context);
-                },
-                icon: const Icon(
-                  Icons.delete_outline_rounded,
-                ),
-                label: const Text(
-                  'Delete Transaction',
-                ),
-              ),
+            _buildActionButton(
+              context: context,
+              icon: Icons.delete_outline_rounded,
+              label: 'Delete Transaction',
+              destructive: true,
+              onPressed: () {
+                _deleteTransaction(context);
+              },
             ),
           ],
         ),
@@ -497,6 +589,10 @@ class TransactionDetailsScreen extends StatelessWidget {
     );
   }
 }
+
+// ============================================================
+// EDIT TRANSACTION SHEET
+// ============================================================
 
 class _EditTransactionSheet extends StatefulWidget {
   final DatabaseService databaseService;
@@ -519,6 +615,7 @@ class _EditTransactionSheetState
   String? _toAccountId;
   String? _categoryId;
   late DateTime _date;
+
   late TextEditingController _amountController;
   late TextEditingController _noteController;
 
@@ -528,15 +625,20 @@ class _EditTransactionSheetState
 
     _type = widget.transaction.type;
     _accountId = widget.transaction.accountId;
-    _toAccountId = widget.transaction.toAccountId;
-    _categoryId = widget.transaction.categoryId;
+    _toAccountId =
+        widget.transaction.toAccountId;
+    _categoryId =
+        widget.transaction.categoryId;
     _date = widget.transaction.date;
 
-    _amountController = TextEditingController(
-      text: widget.transaction.amount.toStringAsFixed(2),
+    _amountController =
+        TextEditingController(
+      text: widget.transaction.amount
+          .toStringAsFixed(2),
     );
 
-    _noteController = TextEditingController(
+    _noteController =
+        TextEditingController(
       text: widget.transaction.note,
     );
 
@@ -565,14 +667,17 @@ class _EditTransactionSheetState
             ? date.hour - 12
             : date.hour;
 
-    final minute = date.minute.toString().padLeft(2, '0');
+    final minute =
+        date.minute.toString().padLeft(2, '0');
 
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+    final period =
+        date.hour >= 12 ? 'PM' : 'AM';
 
     return '$hour:$minute $period';
   }
 
-  List<ExpenseCategory> get _availableCategories {
+  List<ExpenseCategory>
+      get _availableCategories {
     if (_type == TransactionType.income) {
       return incomeSources;
     }
@@ -606,7 +711,8 @@ class _EditTransactionSheetState
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_date),
+      initialTime:
+          TimeOfDay.fromDateTime(_date),
     );
 
     if (picked == null) {
@@ -638,7 +744,8 @@ class _EditTransactionSheetState
             !_availableCategories.any(
               (item) => item.id == _categoryId,
             )) {
-          _categoryId = _availableCategories.first.id;
+          _categoryId =
+              _availableCategories.first.id;
         }
       }
     });
@@ -650,19 +757,25 @@ class _EditTransactionSheetState
     );
 
     if (amount == null || amount <= 0) {
-      _showError('Enter a valid amount.');
+      _showError(
+        'Enter a valid amount.',
+      );
       return;
     }
 
     if (_type != TransactionType.transfer &&
         _categoryId == null) {
-      _showError('Please select a category.');
+      _showError(
+        'Please select a category.',
+      );
       return;
     }
 
     if (_type == TransactionType.transfer) {
       if (_toAccountId == null) {
-        _showError('Please select a destination account.');
+        _showError(
+          'Please select a destination account.',
+        );
         return;
       }
 
@@ -674,13 +787,15 @@ class _EditTransactionSheetState
       }
     }
 
-    final updatedTransaction = TransactionModel(
+    final updatedTransaction =
+        TransactionModel(
       id: widget.transaction.id,
       type: _type,
       amount: amount,
-      categoryId: _type == TransactionType.transfer
-          ? 'transfer'
-          : _categoryId!,
+      categoryId:
+          _type == TransactionType.transfer
+              ? 'transfer'
+              : _categoryId!,
       accountId: _accountId,
       toAccountId:
           _type == TransactionType.transfer
@@ -690,7 +805,9 @@ class _EditTransactionSheetState
       date: _date,
     );
 
-    Navigator.of(context).pop(updatedTransaction);
+    Navigator.of(context).pop(
+      updatedTransaction,
+    );
   }
 
   void _showError(String message) {
@@ -701,18 +818,55 @@ class _EditTransactionSheetState
     );
   }
 
+  Widget _buildSheetHeader(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .primary
+                .withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(
+            Icons.edit_outlined,
+            color: Theme.of(context)
+                .colorScheme
+                .primary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Text(
+            'Edit Transaction',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final accounts = widget.databaseService.accounts;
+    final accounts =
+        widget.databaseService.accounts;
 
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 16,
+        top: 12,
         bottom:
-            MediaQuery.of(context).viewInsets.bottom + 16,
+            MediaQuery.of(context)
+                .viewInsets
+                .bottom +
+                16,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -724,24 +878,21 @@ class _EditTransactionSheetState
                 width: 42,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant
-                      .withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.35),
+                  borderRadius:
+                      BorderRadius.circular(10),
                 ),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            const Text(
-              'Edit Transaction',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            _buildSheetHeader(context),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
             SegmentedButton<TransactionType>(
               segments: const [
@@ -768,8 +919,11 @@ class _EditTransactionSheetState
                 ),
               ],
               selected: {_type},
-              onSelectionChanged: (selection) {
-                _changeType(selection.first);
+              onSelectionChanged:
+                  (selection) {
+                _changeType(
+                  selection.first,
+                );
               },
             ),
 
@@ -781,7 +935,8 @@ class _EditTransactionSheetState
                   const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
+              decoration:
+                  const InputDecoration(
                 labelText: 'Amount',
                 prefixText: '₹ ',
                 border: OutlineInputBorder(),
@@ -792,18 +947,26 @@ class _EditTransactionSheetState
 
             DropdownButtonFormField<String>(
               initialValue: _accountId,
-              decoration: InputDecoration(
-                labelText: _type == TransactionType.transfer
-                    ? 'From Account'
-                    : 'Account',
-                border: const OutlineInputBorder(),
+              decoration:
+                  InputDecoration(
+                labelText:
+                    _type ==
+                            TransactionType.transfer
+                        ? 'From Account'
+                        : 'Account',
+                border:
+                    const OutlineInputBorder(),
               ),
-              items: accounts.map((Account account) {
-                return DropdownMenuItem<String>(
-                  value: account.id,
-                  child: Text(account.name),
-                );
-              }).toList(),
+              items:
+                  accounts.map(
+                (Account account) {
+                  return DropdownMenuItem<String>(
+                    value: account.id,
+                    child:
+                        Text(account.name),
+                  );
+                },
+              ).toList(),
               onChanged: (value) {
                 if (value == null) {
                   return;
@@ -819,26 +982,35 @@ class _EditTransactionSheetState
               },
             ),
 
-            if (_type == TransactionType.transfer) ...[
+            if (_type ==
+                TransactionType.transfer) ...[
               const SizedBox(height: 14),
 
               DropdownButtonFormField<String>(
                 initialValue: _toAccountId,
-                decoration: const InputDecoration(
+                decoration:
+                    const InputDecoration(
                   labelText: 'To Account',
-                  border: OutlineInputBorder(),
+                  border:
+                      OutlineInputBorder(),
                 ),
                 items: accounts
                     .where(
                       (account) =>
-                          account.id != _accountId,
+                          account.id !=
+                          _accountId,
                     )
-                    .map((Account account) {
-                  return DropdownMenuItem<String>(
-                    value: account.id,
-                    child: Text(account.name),
-                  );
-                }).toList(),
+                    .map(
+                  (Account account) {
+                    return DropdownMenuItem<
+                        String>(
+                      value: account.id,
+                      child: Text(
+                        account.name,
+                      ),
+                    );
+                  },
+                ).toList(),
                 onChanged: (value) {
                   setState(() {
                     _toAccountId = value;
@@ -847,27 +1019,34 @@ class _EditTransactionSheetState
               ),
             ],
 
-            if (_type != TransactionType.transfer) ...[
+            if (_type !=
+                TransactionType.transfer) ...[
               const SizedBox(height: 14),
 
               DropdownButtonFormField<String>(
                 initialValue: _categoryId,
-                decoration: InputDecoration(
+                decoration:
+                    InputDecoration(
                   labelText:
-                      _type == TransactionType.income
+                      _type ==
+                              TransactionType.income
                           ? 'Income Source'
                           : 'Category',
-                  border: const OutlineInputBorder(),
+                  border:
+                      const OutlineInputBorder(),
                 ),
                 items: _availableCategories
-                    .map((ExpenseCategory category) {
-                  return DropdownMenuItem<String>(
-                    value: category.id,
-                    child: Text(
-                      '${category.icon} ${category.name}',
-                    ),
-                  );
-                }).toList(),
+                    .map(
+                  (ExpenseCategory category) {
+                    return DropdownMenuItem<
+                        String>(
+                      value: category.id,
+                      child: Text(
+                        '${category.icon} ${category.name}',
+                      ),
+                    );
+                  },
+                ).toList(),
                 onChanged: (value) {
                   setState(() {
                     _categoryId = value;
@@ -881,10 +1060,12 @@ class _EditTransactionSheetState
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child:
+                      OutlinedButton.icon(
                     onPressed: _pickDate,
                     icon: const Icon(
-                      Icons.calendar_today_rounded,
+                      Icons
+                          .calendar_today_rounded,
                     ),
                     label: Text(
                       _formatDate(_date),
@@ -893,10 +1074,12 @@ class _EditTransactionSheetState
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child:
+                      OutlinedButton.icon(
                     onPressed: _pickTime,
                     icon: const Icon(
-                      Icons.access_time_rounded,
+                      Icons
+                          .access_time_rounded,
                     ),
                     label: Text(
                       _formatTime(_date),
@@ -911,10 +1094,13 @@ class _EditTransactionSheetState
             TextField(
               controller: _noteController,
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration:
+                  const InputDecoration(
                 labelText: 'Note',
-                hintText: 'Optional note',
-                border: OutlineInputBorder(),
+                hintText:
+                    'Optional note',
+                border:
+                    OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
