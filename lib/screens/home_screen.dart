@@ -27,11 +27,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _showBalances = true;
+  bool _showBalances = false;
 
   static const Color _navy = Color(0xFF172554);
   static const Color _navyDark = Color(0xFF151C2B);
-
+  static const Color _green = Color(0xFF16A34A);
+  static const Color _red = Color(0xFFEF4444);
+  static const Color _blue = Color(0xFF3B82F6);
   String _formatAmount(double amount) {
     return '₹${amount.toStringAsFixed(2)}';
   }
@@ -42,18 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
@@ -73,47 +65,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _accountName(String accountId) {
-    final account = widget.databaseService.getAccount(accountId);
-    return account?.name ?? 'Unknown account';
+    return widget.databaseService.getAccount(accountId)?.name ??
+        'Unknown account';
   }
 
   String _categoryName(String categoryId) {
     for (final category in expenseCategories) {
-      if (category.id == categoryId) {
-        return category.name;
-      }
+      if (category.id == categoryId) return category.name;
     }
-
     return 'Other';
   }
 
   String _categoryIcon(String categoryId) {
     for (final category in expenseCategories) {
-      if (category.id == categoryId) {
-        return category.icon;
-      }
+      if (category.id == categoryId) return category.icon;
     }
-
     return '📦';
   }
 
   String _incomeSourceName(String sourceId) {
     for (final source in incomeSources) {
-      if (source.id == sourceId) {
-        return source.name;
-      }
+      if (source.id == sourceId) return source.name;
     }
-
     return 'Other';
   }
 
   String _incomeSourceIcon(String sourceId) {
     for (final source in incomeSources) {
-      if (source.id == sourceId) {
-        return source.icon;
-      }
+      if (source.id == sourceId) return source.icon;
     }
-
     return '📦';
   }
 
@@ -126,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'wallet':
         return Icons.account_balance_wallet_rounded;
       case 'credit card':
+      case 'creditcard':
         return Icons.credit_card_rounded;
       default:
         return Icons.account_balance_wallet_rounded;
@@ -141,9 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true && mounted) {
-      setState(() {});
-    }
+    if (result == true && mounted) setState(() {});
   }
 
   Future<void> _openAccounts() async {
@@ -155,9 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true && mounted) {
-      setState(() {});
-    }
+    if (result == true && mounted) setState(() {});
   }
 
   Future<void> _openTransactions() async {
@@ -169,9 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _openAnalytics() async {
@@ -183,9 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _openSettings() async {
@@ -198,9 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _openAccountDashboard(String accountId) async {
@@ -213,44 +184,30 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Widget _buildBalanceCard(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final service = widget.databaseService;
 
-    final totalBalance = widget.databaseService.totalBalance;
-    final totalIncome = widget.databaseService.totalIncome;
-    final totalExpense = widget.databaseService.totalExpense;
-    final accountCount = widget.databaseService.accounts.length;
+    final totalBalance = service.totalBalance;
+    final totalIncome = service.totalIncome;
+    final totalExpense = service.totalExpense;
+    final accountCount = service.accounts.length;
 
-    final balanceBackground =
-        isDark ? _navyDark : _navy;
-
-    final secondaryText =
-        Colors.white.withValues(alpha: 0.62);
-
-    final subtleSurface =
-        Colors.white.withValues(alpha: 0.075);
+    final secondaryText = Colors.white.withValues(alpha: 0.62);
+    final subtleSurface = Colors.white.withValues(alpha: 0.075);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-        22,
-        20,
-        22,
-        20,
-      ),
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
       decoration: BoxDecoration(
-        color: balanceBackground,
+        color: isDark ? _navyDark : _navy,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.22 : 0.12,
-            ),
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.12),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -267,19 +224,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: secondaryText,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
                   ),
                 ),
               ),
               IconButton(
-                tooltip: _showBalances
-                    ? 'Hide balances'
-                    : 'Show balances',
+                tooltip: _showBalances ? 'Hide balances' : 'Show balances',
                 visualDensity: VisualDensity.compact,
                 onPressed: () {
-                  setState(() {
-                    _showBalances = !_showBalances;
-                  });
+                  setState(() => _showBalances = !_showBalances);
                 },
                 icon: Icon(
                   _showBalances
@@ -319,8 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 7),
           Text(
-            '$accountCount '
-            '${accountCount == 1 ? 'account' : 'accounts'}',
+            '$accountCount ${accountCount == 1 ? 'account' : 'accounts'}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: secondaryText,
               fontWeight: FontWeight.w500,
@@ -361,16 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final theme = Theme.of(context);
     final isIncome = title == 'Income';
-
     final accentColor = isIncome
         ? const Color(0xFF67E8A5)
         : const Color(0xFFFF8F8F);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.065),
         borderRadius: BorderRadius.circular(15),
@@ -387,11 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: accentColor.withValues(alpha: 0.11),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(
-              icon,
-              color: accentColor,
-              size: 16,
-            ),
+            child: Icon(icon, color: accentColor, size: 16),
           ),
           const SizedBox(width: 9),
           Expanded(
@@ -402,12 +345,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   title,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: Colors.white.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatAmount(amount),
+                  _displayBalance(amount),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -416,6 +358,171 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCreditSummary(BuildContext context) {
+    final service = widget.databaseService;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final debt = service.totalCreditCardDebt;
+    final availableCredit = service.totalAvailableCredit;
+    final netBalance = service.netBalanceAfterCreditCardDebt;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Credit Overview',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildOverviewCard(
+                context,
+                title: 'Card Debt',
+                amount: debt,
+                icon: Icons.credit_card_rounded,
+                accent: _red,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildOverviewCard(
+                context,
+                title: 'Available Credit',
+                amount: availableCredit,
+                icon: Icons.account_balance_rounded,
+                accent: _blue,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.09),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _green.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: _green,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Net Balance',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Bank and cash balance minus card debt',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  _displayBalance(netBalance),
+                  textAlign: TextAlign.end,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: netBalance < 0 ? _red : _green,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOverviewCard(
+    BuildContext context, {
+    required String title,
+    required double amount,
+    required IconData icon,
+    required Color accent,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.09),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: accent, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.58),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            _displayBalance(amount),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.4,
             ),
           ),
         ],
@@ -445,52 +552,44 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          TextButton(
-            onPressed: onAction,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
+          if (actionText.isNotEmpty)
+            TextButton(
+              onPressed: onAction,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              minimumSize: Size.zero,
-              tapTargetSize:
-                  MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              actionText,
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+              child: Text(
+                actionText,
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildAccountCard(
-    BuildContext context,
-    String accountId,
-  ) {
+  Widget _buildAccountCard(BuildContext context, String accountId) {
     final theme = Theme.of(context);
+    final service = widget.databaseService;
+    final account = service.getAccount(accountId);
 
-    final account =
-        widget.databaseService.getAccount(accountId);
+    if (account == null) return const SizedBox.shrink();
 
-    if (account == null) {
-      return const SizedBox.shrink();
-    }
-
-    final balance =
-        widget.databaseService.getAccountBalance(account.id);
-
-    final isDark =
-        theme.brightness == Brightness.dark;
-
-    final cardColor =
-        isDark ? const Color(0xFF1B2740) : _navy;
+    final isCreditCard = account.isCreditCard;
+    final balance = service.getAccountBalance(account.id);
+    final availableCredit =
+        isCreditCard ? service.getAvailableCredit(account.id) : 0.0;
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF1B2740) : _navy;
 
     return SizedBox(
       width: 276,
@@ -499,9 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(22),
         child: InkWell(
           borderRadius: BorderRadius.circular(22),
-          onTap: () {
-            _openAccountDashboard(account.id);
-          },
+          onTap: () => _openAccountDashboard(account.id),
           child: Padding(
             padding: const EdgeInsets.all(17),
             child: Column(
@@ -513,10 +610,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color:
-                            Colors.white.withValues(alpha: 0.10),
-                        borderRadius:
-                            BorderRadius.circular(13),
+                        color: Colors.white.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(13),
                       ),
                       child: Icon(
                         _accountIcon(account.type),
@@ -527,8 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 11),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             account.name,
@@ -546,8 +640,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Colors.white
-                                  .withValues(alpha: 0.56),
+                              color: Colors.white.withValues(alpha: 0.56),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -557,18 +650,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color:
-                          Colors.white.withValues(alpha: 0.45),
+                      color: Colors.white.withValues(alpha: 0.45),
                       size: 13,
                     ),
                   ],
                 ),
                 const Spacer(),
                 Text(
-                  'Available balance',
+                  isCreditCard ? 'Outstanding debt' : 'Available balance',
                   style: TextStyle(
-                    color:
-                        Colors.white.withValues(alpha: 0.50),
+                    color: Colors.white.withValues(alpha: 0.58),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -585,6 +676,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     letterSpacing: -0.3,
                   ),
                 ),
+                if (isCreditCard) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Available credit: ${_displayBalance(availableCredit)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.70),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -597,18 +701,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final accounts = widget.databaseService.accounts;
 
     return SizedBox(
-      height: 132,
+      height: 155,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: accounts.length,
-        separatorBuilder: (_, _) =>
-            const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          return _buildAccountCard(
-            context,
-            accounts[index].id,
-          );
+          return _buildAccountCard(context, accounts[index].id);
         },
       ),
     );
@@ -624,8 +724,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color:
-              colorScheme.outline.withValues(alpha: 0.08),
+          color: colorScheme.outline.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -634,8 +733,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color:
-                  colorScheme.primary.withValues(alpha: 0.09),
+              color: colorScheme.primary.withValues(alpha: 0.09),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -653,21 +751,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Add your first account to start tracking '
-            'your finances.',
+            'Add your first account to start tracking your finances.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface
-                  .withValues(alpha: 0.52),
+              color: colorScheme.onSurface.withValues(alpha: 0.52),
             ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _openAccounts,
-            icon: const Icon(
-              Icons.add_rounded,
-              size: 18,
-            ),
+            icon: const Icon(Icons.add_rounded, size: 18),
             label: const Text('Add Account'),
           ),
         ],
@@ -682,11 +775,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final isIncome =
-        transaction.type == TransactionType.income;
-
-    final isTransfer =
-        transaction.type == TransactionType.transfer;
+    final isIncome = transaction.type == TransactionType.income;
+    final isTransfer = transaction.type == TransactionType.transfer;
+    final isCardPayment = transaction.type == TransactionType.cardPayment;
 
     String title;
     String subtitle;
@@ -694,39 +785,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (isTransfer) {
       title = 'Transfer';
-
       subtitle =
           '${_accountName(transaction.accountId)} → '
           '${_accountName(transaction.toAccountId ?? '')}';
-
       iconText = '↔️';
+    } else if (isCardPayment) {
+      title = 'Credit Card Payment';
+      subtitle =
+          '${_accountName(transaction.accountId)} → '
+          '${_accountName(transaction.toAccountId ?? '')}';
+      iconText = '💳';
     } else if (isIncome) {
-      title =
-          _incomeSourceName(transaction.categoryId);
-
+      title = _incomeSourceName(transaction.categoryId);
       subtitle = transaction.note.isNotEmpty
           ? transaction.note
           : _accountName(transaction.accountId);
-
-      iconText =
-          _incomeSourceIcon(transaction.categoryId);
+      iconText = _incomeSourceIcon(transaction.categoryId);
     } else {
       title = _categoryName(transaction.categoryId);
-
       subtitle = transaction.note.isNotEmpty
           ? transaction.note
           : _accountName(transaction.accountId);
-
       iconText = _categoryIcon(transaction.categoryId);
     }
 
-    final amountColor = isTransfer
+    final amountColor = isTransfer || isCardPayment
         ? colorScheme.primary
         : isIncome
-            ? const Color(0xFF16A34A)
+            ? _green
             : colorScheme.error;
 
-    final amountPrefix = isTransfer
+    final amountPrefix = isTransfer || isCardPayment
         ? ''
         : isIncome
             ? '+'
@@ -748,8 +837,7 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: colorScheme.outline
-                    .withValues(alpha: 0.07),
+                color: colorScheme.outline.withValues(alpha: 0.07),
               ),
             ),
             child: Row(
@@ -758,84 +846,61 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 45,
                   height: 45,
                   decoration: BoxDecoration(
-                    color: colorScheme.primary
-                        .withValues(alpha: 0.08),
-                    borderRadius:
-                        BorderRadius.circular(14),
+                    color: colorScheme.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
                     child: Text(
                       iconText,
-                      style:
-                          const TextStyle(fontSize: 19),
+                      style: const TextStyle(fontSize: 19),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
                         maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: theme
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(
-                              fontWeight:
-                                  FontWeight.w800,
-                            ),
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         subtitle,
                         maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: theme
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(
-                              color: colorScheme
-                                  .onSurface
-                                  .withValues(
-                                alpha: 0.48,
-                              ),
-                            ),
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.48),
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         '${_formatDate(transaction.date)} • '
                         '${_formatTime(transaction.date)}',
-                        style: theme
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(
-                              color: colorScheme
-                                  .onSurface
-                                  .withValues(
-                                alpha: 0.35,
-                              ),
-                            ),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.35),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  '$amountPrefix'
-                  '${_formatAmount(transaction.amount)}',
-                  style: theme
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(
-                        color: amountColor,
-                        fontWeight: FontWeight.w900,
-                      ),
+                Flexible(
+                  child: Text(
+                    '$amountPrefix${_displayBalance(transaction.amount)}',
+                    textAlign: TextAlign.end,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: amountColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -845,9 +910,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyTransactions(
-    BuildContext context,
-  ) {
+  Widget _buildEmptyTransactions(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -857,8 +920,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color:
-              colorScheme.outline.withValues(alpha: 0.08),
+          color: colorScheme.outline.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -867,8 +929,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color:
-                  colorScheme.primary.withValues(alpha: 0.09),
+              color: colorScheme.primary.withValues(alpha: 0.09),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -886,12 +947,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Add income, expenses or transfers '
-            'to see them here.',
+            'Add income, expenses or transfers to see them here.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface
-                  .withValues(alpha: 0.52),
+              color: colorScheme.onSurface.withValues(alpha: 0.52),
             ),
           ),
         ],
@@ -906,8 +965,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final isDark =
-        theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Expanded(
       child: Material(
@@ -917,10 +975,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(18),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 7,
-              horizontal: 4,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 4),
             child: Column(
               children: [
                 Container(
@@ -928,26 +983,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 48,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(
-                            alpha: 0.07,
-                          )
+                        ? Colors.white.withValues(alpha: 0.07)
                         : _navy.withValues(alpha: 0.07),
-                    borderRadius:
-                        BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(
                     icon,
-                    color: isDark
-                        ? Colors.white
-                        : _navy,
+                    color: isDark ? Colors.white : _navy,
                     size: 21,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   title,
-                  style:
-                      theme.textTheme.labelMedium?.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -986,20 +1035,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final accounts = widget.databaseService.accounts;
+    final service = widget.databaseService;
+    final accounts = service.accounts;
 
-    final transactions =
-        widget.databaseService.transactions.toList()
-          ..sort(
-            (a, b) => b.date.compareTo(a.date),
-          );
+    final transactions = service.transactions.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
 
-    final recentTransactions =
-        transactions.take(5).toList();
+    final recentTransactions = transactions.take(5).toList();
 
-    final theme = Theme.of(context);
-    final isDark =
-        theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -1013,16 +1057,12 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             tooltip: 'Analytics',
-            icon: const Icon(
-              Icons.analytics_outlined,
-            ),
+            icon: const Icon(Icons.analytics_outlined),
             onPressed: _openAnalytics,
           ),
           IconButton(
             tooltip: 'Settings',
-            icon: const Icon(
-              Icons.settings_outlined,
-            ),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: _openSettings,
           ),
           const SizedBox(width: 4),
@@ -1031,31 +1071,24 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            setState(() {});
+            if (mounted) setState(() {});
           },
           child: ListView(
-            physics:
-                const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              110,
-            ),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
             children: [
-              // TOTAL BALANCE
               _buildBalanceCard(context),
+              const SizedBox(height: 22),
 
+              _buildCreditSummary(context),
               const SizedBox(height: 27),
 
-              // ACCOUNTS
               _buildSectionHeader(
                 context,
                 title: 'Accounts',
                 actionText: 'View All',
                 onAction: _openAccounts,
               ),
-
               if (accounts.isEmpty)
                 _buildEmptyAccounts(context)
               else
@@ -1063,35 +1096,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 25),
 
-              // QUICK ACTIONS
               _buildSectionHeader(
                 context,
                 title: 'Quick Access',
                 actionText: '',
                 onAction: () {},
               ),
-
               _buildQuickActions(context),
 
               const SizedBox(height: 27),
 
-              // RECENT TRANSACTIONS
               _buildSectionHeader(
                 context,
                 title: 'Recent Transactions',
                 actionText: 'View All',
                 onAction: _openTransactions,
               ),
-
               if (recentTransactions.isEmpty)
                 _buildEmptyTransactions(context)
               else
                 ...recentTransactions.map(
                   (transaction) =>
-                      _buildTransactionTile(
-                    context,
-                    transaction,
-                  ),
+                      _buildTransactionTile(context, transaction),
                 ),
             ],
           ),
@@ -1099,18 +1125,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddTransaction,
-        backgroundColor:
-            isDark ? const Color(0xFF243451) : _navy,
+        backgroundColor: isDark ? const Color(0xFF243451) : _navy,
         foregroundColor: Colors.white,
         elevation: 5,
-        icon: const Icon(
-          Icons.add_rounded,
-        ),
+        icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Add Transaction',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
     );

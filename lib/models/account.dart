@@ -5,6 +5,8 @@ class Account {
   final String type;
   final double openingBalance;
   final String? lastFourDigits;
+  final double? creditLimit;
+  final DateTime? billingDueDate;
 
   Account({
     required this.id,
@@ -13,7 +15,12 @@ class Account {
     required this.type,
     required this.openingBalance,
     this.lastFourDigits,
+    this.creditLimit,
+    this.billingDueDate,
   });
+
+  bool get isCreditCard =>
+      type.toLowerCase().replaceAll(' ', '') == 'creditcard';
 
   Map<String, dynamic> toMap() {
     return {
@@ -23,6 +30,8 @@ class Account {
       'type': type,
       'openingBalance': openingBalance,
       'lastFourDigits': lastFourDigits,
+      'creditLimit': creditLimit,
+      'billingDueDate': billingDueDate?.toIso8601String(),
     };
   }
 
@@ -32,8 +41,15 @@ class Account {
       name: map['name'] as String,
       bankName: map['bankName'] as String,
       type: map['type'] as String,
-      openingBalance: (map['openingBalance'] as num).toDouble(),
+      openingBalance:
+          (map['openingBalance'] as num).toDouble(),
       lastFourDigits: map['lastFourDigits'] as String?,
+      creditLimit: (map['creditLimit'] as num?)?.toDouble(),
+      billingDueDate: map['billingDueDate'] == null
+          ? null
+          : DateTime.tryParse(
+              map['billingDueDate'] as String,
+            ),
     );
   }
 }

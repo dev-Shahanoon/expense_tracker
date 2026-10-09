@@ -2,6 +2,7 @@ enum TransactionType {
   income,
   expense,
   transfer,
+  cardPayment,
 }
 
 class TransactionModel {
@@ -41,10 +42,13 @@ class TransactionModel {
   factory TransactionModel.fromMap(
     Map<String, dynamic> map,
   ) {
+    final savedType = map['type'] as String;
+
     return TransactionModel(
       id: map['id'] as String,
       type: TransactionType.values.firstWhere(
-        (type) => type.name == map['type'],
+        (type) => type.name == savedType,
+        orElse: () => TransactionType.expense,
       ),
       amount: (map['amount'] as num).toDouble(),
       categoryId: map['categoryId'] as String,

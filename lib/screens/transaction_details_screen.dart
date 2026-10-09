@@ -1,9 +1,9 @@
+
 import 'package:flutter/material.dart';
 
 import '../data/categories.dart';
 import '../data/income_sources.dart';
 import '../models/account.dart';
-import '../models/category.dart';
 import '../models/transaction.dart';
 import '../services/database_service.dart';
 
@@ -17,54 +17,38 @@ class TransactionDetailsScreen extends StatelessWidget {
     required this.transaction,
   });
 
-  String _formatAmount(double amount) {
-    return '₹${amount.toStringAsFixed(2)}';
-  }
+  String _formatAmount(double amount) =>
+      '₹${amount.toStringAsFixed(2)}';
 
-  String _formatDateTime(DateTime date) {
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/'
+      '${date.year}';
+
+  String _formatTime(DateTime date) {
     final hour = date.hour == 0
         ? 12
         : date.hour > 12
             ? date.hour - 12
             : date.hour;
-
     final minute = date.minute.toString().padLeft(2, '0');
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year} • $hour:$minute $period';
+    return '$hour:$minute $period';
   }
 
-  String _getAccountName(String accountId) {
-    final account = databaseService.getAccount(accountId);
+  String _accountName(String id) =>
+      databaseService.getAccount(id)?.name ?? 'Unknown Account';
 
-    return account?.name ?? 'Unknown Account';
-  }
-
-  String _getAccountSubtitle(String accountId) {
-    final account = databaseService.getAccount(accountId);
-
-    if (account == null) {
-      return 'Unknown account';
-    }
-
-    if (account.lastFourDigits != null) {
-      return '${account.bankName} •••• ${account.lastFourDigits}';
-    }
-
-    return account.bankName;
-  }
-
-  String _getCategoryName(String categoryId) {
+  String _categoryName(String id) {
     for (final category in expenseCategories) {
-      if (category.id == categoryId) {
+      if (category.id == id) {
         return '${category.icon} ${category.name}';
       }
     }
 
     for (final source in incomeSources) {
-      if (source.id == categoryId) {
+      if (source.id == id) {
         return '${source.icon} ${source.name}';
       }
     }
@@ -72,141 +56,110 @@ class TransactionDetailsScreen extends StatelessWidget {
     return 'Other';
   }
 
-  String _getTransactionType() {
+  String _transactionType() {
     switch (transaction.type) {
       case TransactionType.income:
         return 'Income';
-
       case TransactionType.expense:
         return 'Expense';
-
       case TransactionType.transfer:
         return 'Transfer';
+      case TransactionType.cardPayment:
+        return 'Credit Card Payment';
     }
   }
 
-  IconData _getTransactionIcon() {
+  IconData _transactionIcon() {
     switch (transaction.type) {
       case TransactionType.income:
         return Icons.arrow_downward_rounded;
-
       case TransactionType.expense:
         return Icons.arrow_upward_rounded;
-
       case TransactionType.transfer:
         return Icons.swap_horiz_rounded;
+      case TransactionType.cardPayment:
+        return Icons.credit_card_rounded;
     }
   }
 
-  Color _getTransactionColor(BuildContext context) {
+  Color _transactionColor() {
     switch (transaction.type) {
       case TransactionType.income:
         return Colors.green;
-
       case TransactionType.expense:
         return Colors.red;
-
       case TransactionType.transfer:
         return Colors.blue;
+      case TransactionType.cardPayment:
+        return Colors.deepPurple;
     }
   }
 
-  String _getAmountText() {
+  String _amountText() {
     switch (transaction.type) {
       case TransactionType.income:
         return '+${_formatAmount(transaction.amount)}';
-
       case TransactionType.expense:
         return '-${_formatAmount(transaction.amount)}';
-
       case TransactionType.transfer:
+      case TransactionType.cardPayment:
         return _formatAmount(transaction.amount);
     }
   }
 
-  Future<void> _deleteTransaction(
-    BuildContext context,
-  ) async {
+  Future<void> _deleteTransaction(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text(
-            'Delete Transaction?',
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Transaction?'),
+        content: const Text(
+          'Are you sure you want to delete this transaction?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
           ),
-          content: const Text(
-            'This transaction will be permanently deleted.',
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(false);
-              },
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(true);
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
 
-    if (!context.mounted || confirmed != true) {
-      return;
-    }
+    if (confirmed != true || !context.mounted) return;
 
-    await databaseService.deleteTransaction(
-      transaction.id,
-    );
+    await databaseService.deleteTransaction(transaction.id);
 
-    if (!context.mounted) {
-      return;
-    }
-
-    Navigator.of(context).pop(true);
+    if (!context.mounted) return;
+    Navigator.pop(context, true);
   }
 
-  Future<void> _editTransaction(
-    BuildContext context,
-  ) async {
-    final result =
-        await showModalBottomSheet<TransactionModel>(
+  Future<void> _editTransaction(BuildContext context) async {
+    final updated = await showModalBottomSheet<TransactionModel>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor:
-          Theme.of(context).scaffoldBackgroundColor,
-      builder: (sheetContext) {
-        return _EditTransactionSheet(
-          databaseService: databaseService,
-          transaction: transaction,
-        );
-      },
+      builder: (_) => _EditTransactionSheet(
+        databaseService: databaseService,
+        transaction: transaction,
+      ),
     );
 
-    if (result == null) {
-      return;
-    }
+    if (updated == null) return;
 
-    await databaseService.updateTransaction(result);
+    await databaseService.updateTransaction(updated);
 
-    if (!context.mounted) {
-      return;
-    }
-
-    Navigator.of(context).pop(true);
+    if (!context.mounted) return;
+    Navigator.pop(context, true);
   }
 
-  Widget _buildDetailTile({
-    required BuildContext context,
+  Widget _detailTile(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String value,
-    String? subtitle,
   }) {
     final theme = Theme.of(context);
 
@@ -215,70 +168,47 @@ class TransactionDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outlineVariant
               .withValues(alpha: 0.45),
         ),
       ),
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary
-                  .withValues(alpha: 0.09),
-              borderRadius: BorderRadius.circular(14),
+                  .withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(13),
             ),
             child: Icon(
               icon,
               color: theme.colorScheme.primary,
-              size: 21,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: theme
-                        .colorScheme
-                        .onSurfaceVariant,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme
-                          .colorScheme
-                          .onSurfaceVariant,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -287,304 +217,151 @@ class TransactionDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-    bool destructive = false,
-  }) {
-    final colorScheme =
-        Theme.of(context).colorScheme;
-
-    return SizedBox(
-      height: 50,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(
-          icon,
-          size: 20,
-        ),
-        label: Text(label),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: destructive
-              ? colorScheme.error
-              : colorScheme.onSurface,
-          side: BorderSide(
-            color: destructive
-                ? colorScheme.error
-                    .withValues(alpha: 0.35)
-                : colorScheme.outlineVariant,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final transactionColor =
-        _getTransactionColor(context);
-
+    final color = _transactionColor();
     final isTransfer =
         transaction.type == TransactionType.transfer;
+    final isCardPayment =
+        transaction.type == TransactionType.cardPayment;
+    final hasDestination = isTransfer || isCardPayment;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Transaction Details',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: const Text('Transaction Details'),
         actions: [
           IconButton(
-            tooltip: 'Edit transaction',
-            onPressed: () {
-              _editTransaction(context);
-            },
-            icon: const Icon(
-              Icons.edit_outlined,
-            ),
+            tooltip: 'Edit',
+            onPressed: () => _editTransaction(context),
+            icon: const Icon(Icons.edit_outlined),
           ),
           IconButton(
-            tooltip: 'Delete transaction',
-            onPressed: () {
-              _deleteTransaction(context);
-            },
-            icon: const Icon(
-              Icons.delete_outline_rounded,
-            ),
+            tooltip: 'Delete',
+            onPressed: () => _deleteTransaction(context),
+            icon: const Icon(Icons.delete_outline),
           ),
-          const SizedBox(width: 4),
         ],
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            10,
-            16,
-            30,
-          ),
-          children: [
-            // =================================================
-            // MAIN SUMMARY
-            // =================================================
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                26,
-                20,
-                24,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: color.withValues(alpha: 0.25),
               ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: transactionColor
-                      .withValues(alpha: 0.22),
+            ),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: color.withValues(alpha: 0.12),
+                  child: Icon(
+                    _transactionIcon(),
+                    color: color,
+                    size: 30,
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 68,
-                    height: 68,
-                    decoration: BoxDecoration(
-                      color: transactionColor
-                          .withValues(alpha: 0.10),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _getTransactionIcon(),
-                      color: transactionColor,
-                      size: 32,
-                    ),
+                const SizedBox(height: 14),
+                Text(
+                  _transactionType(),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w700,
                   ),
-
-                  const SizedBox(height: 15),
-
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: transactionColor
-                          .withValues(alpha: 0.10),
-                      borderRadius:
-                          BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      _getTransactionType(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: transactionColor,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      _getAmountText(),
-                      style: TextStyle(
-                        fontSize: 34,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                        color: transactionColor,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    _formatDateTime(transaction.date),
-                    textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                FittedBox(
+                  child: Text(
+                    _amountText(),
                     style: TextStyle(
-                      fontSize: 13,
-                      color: theme
-                          .colorScheme
-                          .onSurfaceVariant,
+                      color: color,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Details',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // =================================================
-            // CATEGORY
-            // =================================================
-
-            _buildDetailTile(
-              context: context,
-              icon: Icons.category_outlined,
-              title: isTransfer
-                  ? 'Transaction Type'
-                  : transaction.type ==
-                          TransactionType.income
-                      ? 'Income Source'
-                      : 'Category',
-              value: isTransfer
-                  ? 'Transfer'
-                  : _getCategoryName(
-                      transaction.categoryId,
-                    ),
-            ),
-
-            // =================================================
-            // SOURCE ACCOUNT
-            // =================================================
-
-            _buildDetailTile(
-              context: context,
-              icon: Icons.account_balance_rounded,
-              title: isTransfer
-                  ? 'From Account'
-                  : 'Account',
-              value: _getAccountName(
-                transaction.accountId,
-              ),
-              subtitle: _getAccountSubtitle(
-                transaction.accountId,
-              ),
-            ),
-
-            // =================================================
-            // DESTINATION ACCOUNT
-            // =================================================
-
-            if (isTransfer &&
-                transaction.toAccountId != null)
-              _buildDetailTile(
-                context: context,
-                icon: Icons.account_balance_rounded,
-                title: 'To Account',
-                value: _getAccountName(
-                  transaction.toAccountId!,
                 ),
-                subtitle: _getAccountSubtitle(
-                  transaction.toAccountId!,
+                const SizedBox(height: 8),
+                Text(
+                  '${_formatDate(transaction.date)} • '
+                  '${_formatTime(transaction.date)}',
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
                 ),
-              ),
-
-            // =================================================
-            // DATE
-            // =================================================
-
-            _buildDetailTile(
-              context: context,
-              icon: Icons.schedule_rounded,
-              title: 'Date & Time',
-              value: _formatDateTime(
-                transaction.date,
-              ),
+              ],
             ),
-
-            // =================================================
-            // NOTE
-            // =================================================
-
-            if (transaction.note.trim().isNotEmpty)
-              _buildDetailTile(
-                context: context,
-                icon: Icons.notes_rounded,
-                title: 'Note',
-                value: transaction.note,
-              ),
-
-            const SizedBox(height: 12),
-
-            // =================================================
-            // ACTIONS
-            // =================================================
-
-            _buildActionButton(
-              context: context,
-              icon: Icons.edit_outlined,
-              label: 'Edit Transaction',
-              onPressed: () {
-                _editTransaction(context);
-              },
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Details',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
             ),
-
-            const SizedBox(height: 10),
-
-            _buildActionButton(
-              context: context,
-              icon: Icons.delete_outline_rounded,
-              label: 'Delete Transaction',
-              destructive: true,
-              onPressed: () {
-                _deleteTransaction(context);
-              },
+          ),
+          const SizedBox(height: 12),
+          _detailTile(
+            context,
+            icon: Icons.category_outlined,
+            title: 'Type / Category',
+            value: hasDestination
+                ? _transactionType()
+                : _categoryName(transaction.categoryId),
+          ),
+          _detailTile(
+            context,
+            icon: Icons.account_balance_outlined,
+            title: hasDestination ? 'From Account' : 'Account',
+            value: _accountName(transaction.accountId),
+          ),
+          if (hasDestination && transaction.toAccountId != null)
+            _detailTile(
+              context,
+              icon: Icons.credit_card_outlined,
+              title: isCardPayment ? 'Credit Card Paid' : 'To Account',
+              value: _accountName(transaction.toAccountId!),
             ),
-          ],
-        ),
+          _detailTile(
+            context,
+            icon: Icons.calendar_month_outlined,
+            title: 'Date',
+            value: _formatDate(transaction.date),
+          ),
+          _detailTile(
+            context,
+            icon: Icons.access_time_rounded,
+            title: 'Time',
+            value: _formatTime(transaction.date),
+          ),
+          if (transaction.note.trim().isNotEmpty)
+            _detailTile(
+              context,
+              icon: Icons.notes_rounded,
+              title: 'Note',
+              value: transaction.note,
+            ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => _editTransaction(context),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit Transaction'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _deleteTransaction(context),
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Delete Transaction'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -619,31 +396,63 @@ class _EditTransactionSheetState
   late TextEditingController _amountController;
   late TextEditingController _noteController;
 
+  List<Account> get _accounts =>
+      widget.databaseService.accounts;
+
+  bool get _needsDestination =>
+      _type == TransactionType.transfer ||
+      _type == TransactionType.cardPayment;
+
+  List<Account> get _sourceAccounts {
+    if (_type == TransactionType.cardPayment) {
+      return _accounts.where((a) => !a.isCreditCard).toList();
+    }
+
+    return _accounts;
+  }
+
+  List<Account> get _destinationAccounts {
+    return _accounts.where((account) {
+      if (account.id == _accountId) return false;
+
+      if (_type == TransactionType.cardPayment) {
+        return account.isCreditCard;
+      }
+
+      return true;
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
 
     _type = widget.transaction.type;
     _accountId = widget.transaction.accountId;
-    _toAccountId =
-        widget.transaction.toAccountId;
-    _categoryId =
-        widget.transaction.categoryId;
+    _toAccountId = widget.transaction.toAccountId;
+    _categoryId = widget.transaction.categoryId;
     _date = widget.transaction.date;
 
-    _amountController =
-        TextEditingController(
-      text: widget.transaction.amount
-          .toStringAsFixed(2),
+    _amountController = TextEditingController(
+      text: widget.transaction.amount.toStringAsFixed(2),
     );
-
-    _noteController =
-        TextEditingController(
+    _noteController = TextEditingController(
       text: widget.transaction.note,
     );
 
-    if (_type == TransactionType.transfer) {
+    if (_type == TransactionType.transfer ||
+        _type == TransactionType.cardPayment) {
       _categoryId = null;
+    }
+
+    if (_sourceAccounts.isNotEmpty &&
+        !_sourceAccounts.any((a) => a.id == _accountId)) {
+      _accountId = _sourceAccounts.first.id;
+    }
+
+    if (_toAccountId != null &&
+        !_destinationAccounts.any((a) => a.id == _toAccountId)) {
+      _toAccountId = null;
     }
   }
 
@@ -654,54 +463,47 @@ class _EditTransactionSheetState
     super.dispose();
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
+  void _changeType(TransactionType type) {
+    setState(() {
+      _type = type;
+      _toAccountId = null;
+      _categoryId = null;
 
-  String _formatTime(DateTime date) {
-    final hour = date.hour == 0
-        ? 12
-        : date.hour > 12
-            ? date.hour - 12
-            : date.hour;
+      if (_sourceAccounts.isNotEmpty &&
+          !_sourceAccounts.any((a) => a.id == _accountId)) {
+        _accountId = _sourceAccounts.first.id;
+      }
 
-    final minute =
-        date.minute.toString().padLeft(2, '0');
+      if (type == TransactionType.income &&
+          incomeSources.isNotEmpty) {
+        _categoryId = incomeSources.first.id;
+      } else if (type == TransactionType.expense &&
+          expenseCategories.isNotEmpty) {
+        _categoryId = expenseCategories.first.id;
+      }
 
-    final period =
-        date.hour >= 12 ? 'PM' : 'AM';
-
-    return '$hour:$minute $period';
-  }
-
-  List<ExpenseCategory>
-      get _availableCategories {
-    if (_type == TransactionType.income) {
-      return incomeSources;
-    }
-
-    return expenseCategories;
+      if (type == TransactionType.cardPayment) {
+        final cards = _accounts.where((a) => a.isCreditCard);
+        if (cards.isNotEmpty) _toAccountId = cards.first.id;
+      }
+    });
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+    final selected = await showDatePicker(
       context: context,
       initialDate: _date,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
-    if (picked == null) {
-      return;
-    }
+    if (selected == null || !mounted) return;
 
     setState(() {
       _date = DateTime(
-        picked.year,
-        picked.month,
-        picked.day,
+        selected.year,
+        selected.month,
+        selected.day,
         _date.hour,
         _date.minute,
       );
@@ -709,268 +511,199 @@ class _EditTransactionSheetState
   }
 
   Future<void> _pickTime() async {
-    final picked = await showTimePicker(
+    final selected = await showTimePicker(
       context: context,
-      initialTime:
-          TimeOfDay.fromDateTime(_date),
+      initialTime: TimeOfDay.fromDateTime(_date),
     );
 
-    if (picked == null) {
-      return;
-    }
+    if (selected == null || !mounted) return;
 
     setState(() {
       _date = DateTime(
         _date.year,
         _date.month,
         _date.day,
-        picked.hour,
-        picked.minute,
+        selected.hour,
+        selected.minute,
       );
     });
   }
 
-  void _changeType(TransactionType type) {
-    setState(() {
-      _type = type;
-
-      if (type == TransactionType.transfer) {
-        _categoryId = null;
-        _toAccountId = null;
-      } else {
-        _toAccountId = null;
-
-        if (_categoryId == null ||
-            !_availableCategories.any(
-              (item) => item.id == _categoryId,
-            )) {
-          _categoryId =
-              _availableCategories.first.id;
-        }
-      }
-    });
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   void _save() {
-    final amount = double.tryParse(
-      _amountController.text.trim(),
-    );
+    final amount = double.tryParse(_amountController.text.trim());
 
     if (amount == null || amount <= 0) {
-      _showError(
-        'Enter a valid amount.',
-      );
+      _showError('Please enter a valid amount.');
       return;
     }
 
-    if (_type != TransactionType.transfer &&
-        _categoryId == null) {
-      _showError(
-        'Please select a category.',
-      );
+    if (_sourceAccounts.isEmpty ||
+        !_sourceAccounts.any((a) => a.id == _accountId)) {
+      _showError('Please select a source account.');
       return;
     }
 
-    if (_type == TransactionType.transfer) {
+    if (_needsDestination) {
       if (_toAccountId == null) {
         _showError(
-          'Please select a destination account.',
+          _type == TransactionType.cardPayment
+              ? 'Please select a credit card.'
+              : 'Please select a destination account.',
         );
         return;
       }
 
       if (_toAccountId == _accountId) {
-        _showError(
-          'Source and destination accounts must be different.',
-        );
+        _showError('Select two different accounts.');
         return;
       }
+
+      final destination =
+          widget.databaseService.getAccount(_toAccountId!);
+
+      if (destination == null) {
+        _showError('The destination account could not be found.');
+        return;
+      }
+
+      if (_type == TransactionType.cardPayment &&
+          !destination.isCreditCard) {
+        _showError('Select a credit card as the destination.');
+        return;
+      }
+    } else if (_categoryId == null) {
+      _showError('Please select a category.');
+      return;
     }
 
-    final updatedTransaction =
-        TransactionModel(
+    final updated = TransactionModel(
       id: widget.transaction.id,
       type: _type,
       amount: amount,
-      categoryId:
-          _type == TransactionType.transfer
-              ? 'transfer'
+      categoryId: _type == TransactionType.transfer
+          ? 'transfer'
+          : _type == TransactionType.cardPayment
+              ? 'card_payment'
               : _categoryId!,
       accountId: _accountId,
-      toAccountId:
-          _type == TransactionType.transfer
-              ? _toAccountId
-              : null,
-      note: _noteController.text.trim(),
+      toAccountId: _needsDestination ? _toAccountId : null,
       date: _date,
+      note: _noteController.text.trim(),
     );
 
-    Navigator.of(context).pop(
-      updatedTransaction,
-    );
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  }
-
-  Widget _buildSheetHeader(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .primary
-                .withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Icon(
-            Icons.edit_outlined,
-            color: Theme.of(context)
-                .colorScheme
-                .primary,
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Text(
-            'Edit Transaction',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      ],
-    );
+    Navigator.pop(context, updated);
   }
 
   @override
   Widget build(BuildContext context) {
-    final accounts =
-        widget.databaseService.accounts;
+    final theme = Theme.of(context);
+    final categories = _type == TransactionType.income
+        ? incomeSources
+        : expenseCategories;
+
+    final selectedCategoryExists = categories.any(
+      (category) => category.id == _categoryId,
+    );
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom:
-            MediaQuery.of(context)
-                .viewInsets
-                .bottom +
-                16,
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Container(
-                width: 42,
+                width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.35),
-                  borderRadius:
-                      BorderRadius.circular(10),
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            _buildSheetHeader(context),
-
+            const Text(
+              'Edit Transaction',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: 20),
-
-            SegmentedButton<TransactionType>(
-              segments: const [
-                ButtonSegment(
-                  value: TransactionType.expense,
-                  label: Text('Expense'),
-                  icon: Icon(
-                    Icons.arrow_upward_rounded,
-                  ),
-                ),
-                ButtonSegment(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _typeChip(
+                  label: 'Income',
                   value: TransactionType.income,
-                  label: Text('Income'),
-                  icon: Icon(
-                    Icons.arrow_downward_rounded,
-                  ),
+                  icon: Icons.arrow_downward_rounded,
                 ),
-                ButtonSegment(
+                _typeChip(
+                  label: 'Expense',
+                  value: TransactionType.expense,
+                  icon: Icons.arrow_upward_rounded,
+                ),
+                _typeChip(
+                  label: 'Transfer',
                   value: TransactionType.transfer,
-                  label: Text('Transfer'),
-                  icon: Icon(
-                    Icons.swap_horiz_rounded,
-                  ),
+                  icon: Icons.swap_horiz_rounded,
+                ),
+                _typeChip(
+                  label: 'Card Payment',
+                  value: TransactionType.cardPayment,
+                  icon: Icons.credit_card_rounded,
                 ),
               ],
-              selected: {_type},
-              onSelectionChanged:
-                  (selection) {
-                _changeType(
-                  selection.first,
-                );
-              },
             ),
-
-            const SizedBox(height: 16),
-
+            const SizedBox(height: 18),
             TextField(
               controller: _amountController,
               keyboardType:
-                  const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration:
-                  const InputDecoration(
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
                 labelText: 'Amount',
                 prefixText: '₹ ',
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 14),
-
             DropdownButtonFormField<String>(
-              initialValue: _accountId,
-              decoration:
-                  InputDecoration(
-                labelText:
-                    _type ==
-                            TransactionType.transfer
-                        ? 'From Account'
-                        : 'Account',
-                border:
-                    const OutlineInputBorder(),
+              initialValue: _sourceAccounts.any((a) => a.id == _accountId)
+                  ? _accountId
+                  : null,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'From Account',
+                border: OutlineInputBorder(),
               ),
-              items:
-                  accounts.map(
-                (Account account) {
-                  return DropdownMenuItem<String>(
-                    value: account.id,
-                    child:
-                        Text(account.name),
-                  );
-                },
-              ).toList(),
+              items: _sourceAccounts
+                  .map(
+                    (account) => DropdownMenuItem(
+                      value: account.id,
+                      child: Text(
+                        account.isCreditCard
+                            ? '${account.name} (Credit Card)'
+                            : account.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                  .toList(),
               onChanged: (value) {
-                if (value == null) {
-                  return;
-                }
+                if (value == null) return;
 
                 setState(() {
                   _accountId = value;
@@ -981,148 +714,132 @@ class _EditTransactionSheetState
                 });
               },
             ),
-
-            if (_type ==
-                TransactionType.transfer) ...[
+            if (_needsDestination) ...[
               const SizedBox(height: 14),
-
               DropdownButtonFormField<String>(
-                initialValue: _toAccountId,
-                decoration:
-                    const InputDecoration(
-                  labelText: 'To Account',
-                  border:
-                      OutlineInputBorder(),
+                initialValue: _destinationAccounts.any(
+                  (a) => a.id == _toAccountId,
+                )
+                    ? _toAccountId
+                    : null,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: _type == TransactionType.cardPayment
+                      ? 'Credit Card'
+                      : 'To Account',
+                  border: const OutlineInputBorder(),
                 ),
-                items: accounts
-                    .where(
-                      (account) =>
-                          account.id !=
-                          _accountId,
+                items: _destinationAccounts
+                    .map(
+                      (account) => DropdownMenuItem(
+                        value: account.id,
+                        child: Text(
+                          account.isCreditCard
+                              ? '${account.name} (Credit Card)'
+                              : account.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     )
-                    .map(
-                  (Account account) {
-                    return DropdownMenuItem<
-                        String>(
-                      value: account.id,
-                      child: Text(
-                        account.name,
-                      ),
-                    );
-                  },
-                ).toList(),
+                    .toList(),
                 onChanged: (value) {
-                  setState(() {
-                    _toAccountId = value;
-                  });
+                  setState(() => _toAccountId = value);
                 },
               ),
             ],
-
-            if (_type !=
-                TransactionType.transfer) ...[
+            if (!_needsDestination) ...[
               const SizedBox(height: 14),
-
               DropdownButtonFormField<String>(
-                initialValue: _categoryId,
-                decoration:
-                    InputDecoration(
-                  labelText:
-                      _type ==
-                              TransactionType.income
-                          ? 'Income Source'
-                          : 'Category',
-                  border:
-                      const OutlineInputBorder(),
+                initialValue: selectedCategoryExists ? _categoryId : null,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: _type == TransactionType.income
+                      ? 'Income Source'
+                      : 'Category',
+                  border: const OutlineInputBorder(),
                 ),
-                items: _availableCategories
+                items: categories
                     .map(
-                  (ExpenseCategory category) {
-                    return DropdownMenuItem<
-                        String>(
-                      value: category.id,
-                      child: Text(
-                        '${category.icon} ${category.name}',
+                      (category) => DropdownMenuItem<String>(
+                        value: category.id,
+                        child: Text(
+                          '${category.icon} ${category.name}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    );
-                  },
-                ).toList(),
+                    )
+                    .toList(),
                 onChanged: (value) {
-                  setState(() {
-                    _categoryId = value;
-                  });
+                  setState(() => _categoryId = value);
                 },
               ),
             ],
-
             const SizedBox(height: 14),
-
             Row(
               children: [
                 Expanded(
-                  child:
-                      OutlinedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: _pickDate,
-                    icon: const Icon(
-                      Icons
-                          .calendar_today_rounded,
-                    ),
+                    icon: const Icon(Icons.calendar_today_outlined),
                     label: Text(
-                      _formatDate(_date),
+                      '${_date.day.toString().padLeft(2, '0')}/'
+                      '${_date.month.toString().padLeft(2, '0')}/'
+                      '${_date.year}',
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child:
-                      OutlinedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: _pickTime,
-                    icon: const Icon(
-                      Icons
-                          .access_time_rounded,
-                    ),
+                    icon: const Icon(Icons.access_time_rounded),
                     label: Text(
-                      _formatTime(_date),
+                      '${_date.hour % 12 == 0 ? 12 : _date.hour % 12}:'
+                      '${_date.minute.toString().padLeft(2, '0')} '
+                      '${_date.hour >= 12 ? 'PM' : 'AM'}',
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 14),
-
             TextField(
               controller: _noteController,
-              maxLines: 3,
-              decoration:
-                  const InputDecoration(
-                labelText: 'Note',
-                hintText:
-                    'Optional note',
-                border:
-                    OutlineInputBorder(),
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Note (optional)',
+                border: OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
-
             const SizedBox(height: 20),
-
             SizedBox(
               width: double.infinity,
               height: 52,
-              child: FilledButton.icon(
+              child: FilledButton(
                 onPressed: _save,
-                icon: const Icon(
-                  Icons.check_rounded,
-                ),
-                label: const Text(
+                child: const Text(
                   'Save Changes',
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _typeChip({
+    required String label,
+    required TransactionType value,
+    required IconData icon,
+  }) {
+    return ChoiceChip(
+      selected: _type == value,
+      avatar: Icon(icon, size: 17),
+      label: Text(label),
+      onSelected: (_) => _changeType(value),
     );
   }
 }
