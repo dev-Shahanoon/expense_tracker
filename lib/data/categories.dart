@@ -1,54 +1,30 @@
+
 import '../models/category.dart';
 
 const List<ExpenseCategory> expenseCategories = [
-  ExpenseCategory(
-    id: 'food',
-    name: 'Food',
-    icon: '🍔',
-  ),
-  ExpenseCategory(
-    id: 'transport',
-    name: 'Transport',
-    icon: '🚗',
-  ),
-  ExpenseCategory(
-    id: 'shopping',
-    name: 'Shopping',
-    icon: '🛍️',
-  ),
-  ExpenseCategory(
-    id: 'bills',
-    name: 'Bills',
-    icon: '🏠',
-  ),
-  ExpenseCategory(
-    id: 'education',
-    name: 'Education',
-    icon: '📚',
-  ),
-  ExpenseCategory(
-    id: 'health',
-    name: 'Health',
-    icon: '💊',
-  ),
-  ExpenseCategory(
-    id: 'entertainment',
-    name: 'Entertainment',
-    icon: '🎬',
-  ),
-  ExpenseCategory(
-    id: 'groceries',
-    name: 'Groceries',
-    icon: '🛒',
-  ),
-  ExpenseCategory(
-    id: 'travel',
-    name: 'Travel',
-    icon: '✈️',
-  ),
-  ExpenseCategory(
-    id: 'other',
-    name: 'Other',
-    icon: '📦',
-  ),
+  ExpenseCategory(id: 'food', name: 'Food & Dining', icon: '🍔'),
+  ExpenseCategory(id: 'groceries', name: 'Groceries', icon: '🛒'),
+  ExpenseCategory(id: 'coffee', name: 'Coffee & Snacks', icon: '☕'),
+  ExpenseCategory(id: 'transport', name: 'Transport', icon: '🚗'),
+  ExpenseCategory(id: 'fuel', name: 'Fuel', icon: '⛽'),
+  ExpenseCategory(id: 'vehicle_maintenance', name: 'Vehicle Maintenance', icon: '🔧'),
+  ExpenseCategory(id: 'shopping', name: 'Shopping', icon: '🛍️'),
+  ExpenseCategory(id: 'clothing', name: 'Clothing', icon: '👕'),
+  ExpenseCategory(id: 'personal_care', name: 'Personal Care', icon: '🧴'),
+  ExpenseCategory(id: 'bills', name: 'Bills & Utilities', icon: '💡'),
+  ExpenseCategory(id: 'internet', name: 'Internet & Mobile', icon: '📱'),
+  ExpenseCategory(id: 'rent', name: 'Rent & Housing', icon: '🏠'),
+  ExpenseCategory(id: 'household', name: 'Household Items', icon: '🧹'),
+  ExpenseCategory(id: 'education', name: 'Education', icon: '📚'),
+  ExpenseCategory(id: 'health', name: 'Health & Medical', icon: '💊'),
+  ExpenseCategory(id: 'entertainment', name: 'Entertainment', icon: '🎬'),
+  ExpenseCategory(id: 'subscriptions', name: 'Subscriptions', icon: '📺'),
+  ExpenseCategory(id: 'fitness', name: 'Fitness & Sports', icon: '🏋️'),
+  ExpenseCategory(id: 'travel', name: 'Travel', icon: '✈️'),
+  ExpenseCategory(id: 'gifts', name: 'Gifts & Donations', icon: '🎁'),
+  ExpenseCategory(id: 'pets', name: 'Pets', icon: '🐾'),
+  ExpenseCategory(id: 'insurance', name: 'Insurance', icon: '🛡️'),
+  ExpenseCategory(id: 'loan', name: 'Loan Payments', icon: '🏦'),
+  ExpenseCategory(id: 'taxes', name: 'Taxes & Fees', icon: '🧾'),
+  ExpenseCategory(id: 'other', name: 'Other', icon: '📦'),
 ];

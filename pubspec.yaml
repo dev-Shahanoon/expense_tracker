@@ -40,6 +40,7 @@ dependencies:
   share_plus: ^13.3.1
   path_provider: ^2.1.6
   file_picker: ^13.1.0
+  app_links: ^7.2.2
 
 dev_dependencies:
   flutter_test:
@@ -57,12 +58,13 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+flutter:
   uses-material-design: true
+
+  assets:
+    - assets/banks/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

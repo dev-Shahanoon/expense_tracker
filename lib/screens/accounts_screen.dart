@@ -1,17 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../widgets/bank_logo.dart';
 import '../models/account.dart';
 import '../services/database_service.dart';
+import 'account_dashboard_screen.dart';
 
 class AccountsScreen extends StatefulWidget {
   final DatabaseService databaseService;
 
-  const AccountsScreen({
-    super.key,
-    required this.databaseService,
-  });
+  const AccountsScreen({super.key, required this.databaseService});
 
   @override
   State<AccountsScreen> createState() => _AccountsScreenState();
@@ -27,6 +25,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
   final _creditLimitController = TextEditingController();
 
   String _selectedType = 'Bank Account';
+  String _selectedBank = 'State Bank of India';
 
   final List<String> _accountTypes = [
     'Bank Account',
@@ -34,6 +33,26 @@ class _AccountsScreenState extends State<AccountsScreen> {
     'Cash',
     'Credit Card',
     'Wallet',
+  ];
+
+  final List<String> _banks = [
+    'State Bank of India',
+    'HDFC Bank',
+    'ICICI Bank',
+    'Axis Bank',
+    'Kotak Mahindra Bank',
+    'Federal Bank',
+    'Canara Bank',
+    'Punjab National Bank',
+    'Bank of Baroda',
+    'IndusInd Bank',
+    'Yes Bank',
+    'Indian Bank',
+    'Union Bank of India',
+    'IDFC FIRST Bank',
+    'South Indian Bank',
+    'Kerala Gramin Bank',
+    'Other',
   ];
 
   @override
@@ -46,11 +65,9 @@ class _AccountsScreenState extends State<AccountsScreen> {
     super.dispose();
   }
 
-  String _formatAmount(double amount) =>
-      '₹${amount.toStringAsFixed(2)}';
+  String _formatAmount(double amount) => '₹${amount.toStringAsFixed(2)}';
 
-  double get _totalBalance =>
-      widget.databaseService.totalBalance;
+  double get _totalBalance => widget.databaseService.totalBalance;
 
   IconData _accountIcon(String type) {
     switch (type) {
@@ -88,16 +105,37 @@ class _AccountsScreenState extends State<AccountsScreen> {
     }
   }
 
+  Future<void> _openAccount(Account account) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AccountDashboardScreen(
+          databaseService: widget.databaseService,
+          accountId: account.id,
+        ),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _showAccountSheet({Account? account}) {
     final isEditing = account != null;
 
     _nameController.text = account?.name ?? '';
     _bankController.text = account?.bankName ?? '';
-    _balanceController.text =
-        account?.openingBalance.toString() ?? '';
+    _balanceController.text = account?.openingBalance.toString() ?? '';
     _lastFourController.text = account?.lastFourDigits ?? '';
-    _creditLimitController.text =
-        account?.creditLimit?.toString() ?? '';
+    _creditLimitController.text = account?.creditLimit?.toString() ?? '';
+
+    final existingBank = account?.bankName.trim() ?? '';
+
+    _selectedBank = existingBank.isEmpty
+        ? _banks.first
+        : _banks.contains(existingBank)
+        ? existingBank
+        : 'Other';
 
     _selectedType = account?.type ?? 'Bank Account';
 
@@ -171,54 +209,101 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       ),
                       const SizedBox(height: 22),
 
+                      // Account name
                       _label(context, 'Account Name'),
                       const SizedBox(height: 7),
                       TextFormField(
                         controller: _nameController,
                         textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
-                          hintText: 'e.g. Main Account',
-                          prefixIcon: Icon(Icons.person_outline_rounded),
+                          hintText: 'e.g. My Savings Account',
+                          prefixIcon: Icon(
+                            Icons.account_balance_wallet_outlined,
+                          ),
                         ),
-                        validator: (value) =>
-                            value == null || value.trim().isEmpty
-                                ? 'Enter an account name'
-                                : null,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Enter an account name';
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 16),
+
+                      // Bank/provider dropdown
                       _label(context, 'Bank / Provider'),
                       const SizedBox(height: 7),
-                      TextFormField(
-                        controller: _bankController,
-                        textCapitalization: TextCapitalization.words,
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedBank,
+                        isExpanded: true,
                         decoration: const InputDecoration(
-                          hintText: 'e.g. HDFC Bank',
-                          prefixIcon:
-                              Icon(Icons.account_balance_outlined),
+                          prefixIcon: Icon(Icons.account_balance_outlined),
+                          hintText: 'Select your bank',
                         ),
-                        validator: (value) =>
-                            value == null || value.trim().isEmpty
-                                ? 'Enter the bank or provider'
-                                : null,
+                        items: _banks.map((bank) {
+                          return DropdownMenuItem<String>(
+                            value: bank,
+                            child: Text(bank),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value == null) return;
+
+                          setSheetState(() {
+                            _selectedBank = value;
+
+                            if (value != 'Other') {
+                              _bankController.text = value;
+                            } else {
+                              _bankController.clear();
+                            }
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Select a bank or provider';
+                          }
+                          return null;
+                        },
                       ),
 
+                      if (_selectedBank == 'Other') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _bankController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter bank or provider name',
+                            prefixIcon: Icon(Icons.edit_outlined),
+                          ),
+                          validator: (value) {
+                            if (_selectedBank == 'Other' &&
+                                (value == null || value.trim().isEmpty)) {
+                              return 'Enter the bank or provider name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+
                       const SizedBox(height: 16),
+
+                      // Account type
                       _label(context, 'Account Type'),
                       const SizedBox(height: 7),
                       DropdownButtonFormField<String>(
                         initialValue: _selectedType,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.category_outlined),
                         ),
-                        items: _accountTypes
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              ),
-                            )
-                            .toList(),
+                        items: _accountTypes.map((type) {
+                          return DropdownMenuItem<String>(
+                            value: type,
+                            child: Text(type),
+                          );
+                        }).toList(),
                         onChanged: (value) {
                           if (value == null) return;
 
@@ -229,6 +314,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       ),
 
                       const SizedBox(height: 16),
+
+                      // Opening balance or starting card debt
                       _label(
                         context,
                         isCreditCard
@@ -238,8 +325,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       const SizedBox(height: 7),
                       TextFormField(
                         controller: _balanceController,
-                        keyboardType:
-                            const TextInputType.numberWithOptions(
+                        keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
                         inputFormatters: [
@@ -249,23 +335,17 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         ],
                         decoration: InputDecoration(
                           hintText: '0.00',
-                          prefixIcon: const Icon(
-                            Icons.currency_rupee_rounded,
-                          ),
+                          prefixIcon: const Icon(Icons.currency_rupee_rounded),
                           helperText: isCreditCard
                               ? 'Existing card debt before tracked transactions'
                               : null,
                         ),
                         validator: (value) {
-                          final amount = double.tryParse(
-                            value?.trim() ?? '',
-                          );
+                          final amount = double.tryParse(value?.trim() ?? '');
 
-                          if (amount == null) {
-                            return 'Enter a valid amount';
-                          }
-
-                          if (!amount.isFinite || amount < 0) {
+                          if (amount == null ||
+                              !amount.isFinite ||
+                              amount < 0) {
                             return 'Enter a valid non-negative amount';
                           }
 
@@ -273,14 +353,14 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         },
                       ),
 
+                      // Credit limit appears only for credit cards
                       if (isCreditCard) ...[
                         const SizedBox(height: 16),
                         _label(context, 'Credit Limit'),
                         const SizedBox(height: 7),
                         TextFormField(
                           controller: _creditLimitController,
-                          keyboardType:
-                              const TextInputType.numberWithOptions(
+                          keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           inputFormatters: [
@@ -289,23 +369,32 @@ class _AccountsScreenState extends State<AccountsScreen> {
                             ),
                           ],
                           decoration: const InputDecoration(
-                            hintText: 'e.g. 50000',
-                            prefixIcon:
-                                Icon(Icons.credit_card_rounded),
-                            helperText:
-                                'Enter the total limit provided by your bank',
+                            hintText: 'Enter credit limit',
+                            prefixIcon: Icon(Icons.credit_card_outlined),
+                            prefixText: '₹ ',
                           ),
                           validator: (value) {
                             if (!isCreditCard) return null;
 
-                            final limit = double.tryParse(
-                              value?.trim() ?? '',
-                            );
+                            final text = value?.trim() ?? '';
+                            final limit = double.tryParse(text);
+
+                            if (text.isEmpty) {
+                              return 'Enter the credit limit';
+                            }
 
                             if (limit == null ||
                                 !limit.isFinite ||
                                 limit <= 0) {
-                              return 'Enter a credit limit greater than zero';
+                              return 'Enter a valid credit limit';
+                            }
+
+                            final outstanding = double.tryParse(
+                              _balanceController.text.trim(),
+                            );
+
+                            if (outstanding != null && outstanding > limit) {
+                              return 'Outstanding cannot exceed the credit limit';
                             }
 
                             return null;
@@ -314,6 +403,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       ],
 
                       const SizedBox(height: 16),
+
+                      // Optional card/account digits
                       _label(context, 'Last 4 Digits (Optional)'),
                       const SizedBox(height: 7),
                       TextFormField(
@@ -331,9 +422,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         validator: (value) {
                           final digits = value?.trim() ?? '';
 
-                          if (digits.isEmpty) return null;
-
-                          if (digits.length != 4) {
+                          if (digits.isNotEmpty && digits.length != 4) {
                             return 'Enter exactly 4 digits';
                           }
 
@@ -342,21 +431,18 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       ),
 
                       const SizedBox(height: 24),
+
                       SizedBox(
                         width: double.infinity,
                         height: 52,
                         child: FilledButton.icon(
                           onPressed: () => _saveAccount(account),
                           icon: Icon(
-                            isEditing
-                                ? Icons.save_rounded
-                                : Icons.add_rounded,
+                            isEditing ? Icons.save_rounded : Icons.add_rounded,
                           ),
                           label: Text(
                             isEditing ? 'Save Changes' : 'Add Account',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),
@@ -374,9 +460,9 @@ class _AccountsScreenState extends State<AccountsScreen> {
   Widget _label(BuildContext context, String text) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
     );
   }
 
@@ -384,20 +470,43 @@ class _AccountsScreenState extends State<AccountsScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final isCreditCard = _selectedType == 'Credit Card';
+    final openingBalance = double.tryParse(_balanceController.text.trim());
+
+    if (openingBalance == null ||
+        !openingBalance.isFinite ||
+        openingBalance < 0) {
+      return;
+    }
+
+    double? creditLimit;
+
+    if (isCreditCard) {
+      creditLimit = double.tryParse(_creditLimitController.text.trim());
+
+      if (creditLimit == null ||
+          !creditLimit.isFinite ||
+          creditLimit <= 0 ||
+          openingBalance > creditLimit) {
+        return;
+      }
+    }
+
+    final bankName = _selectedBank == 'Other'
+        ? _bankController.text.trim()
+        : _selectedBank;
 
     final account = Account(
-      id: existingAccount?.id ??
+      id:
+          existingAccount?.id ??
           DateTime.now().microsecondsSinceEpoch.toString(),
       name: _nameController.text.trim(),
-      bankName: _bankController.text.trim(),
+      bankName: bankName,
       type: _selectedType,
-      openingBalance: double.parse(_balanceController.text.trim()),
+      openingBalance: openingBalance,
       lastFourDigits: _lastFourController.text.trim().isEmpty
           ? null
           : _lastFourController.text.trim(),
-      creditLimit: isCreditCard
-          ? double.parse(_creditLimitController.text.trim())
-          : null,
+      creditLimit: isCreditCard ? creditLimit : null,
       billingDueDate: existingAccount?.billingDueDate,
     );
 
@@ -407,7 +516,6 @@ class _AccountsScreenState extends State<AccountsScreen> {
       if (!mounted) return;
 
       Navigator.of(context).pop();
-
       setState(() {});
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -422,15 +530,16 @@ class _AccountsScreenState extends State<AccountsScreen> {
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save account: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not save account: $error')));
     }
   }
 
   Future<void> _deleteAccount(Account account) async {
-    final linkedTransactions =
-        widget.databaseService.getAccountTransactions(account.id);
+    final linkedTransactions = widget.databaseService.getAccountTransactions(
+      account.id,
+    );
 
     if (linkedTransactions.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -471,9 +580,9 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
       setState(() {});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${account.name} deleted')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${account.name} deleted')));
     } catch (error) {
       if (!mounted) return;
 
@@ -520,9 +629,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
           const SizedBox(height: 8),
           Text(
             '${widget.databaseService.accounts.length} accounts connected',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white60,
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white60),
           ),
         ],
       ),
@@ -533,166 +640,134 @@ class _AccountsScreenState extends State<AccountsScreen> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final isCreditCard = account.isCreditCard;
-    final balance =
-        widget.databaseService.getAccountBalance(account.id);
 
-    final availableCredit =
-        widget.databaseService.getAvailableCredit(account.id);
-
+    final balance = widget.databaseService.getAccountBalance(account.id);
+    final availableCredit = widget.databaseService.getAvailableCredit(
+      account.id,
+    );
     final creditLimit = account.creditLimit ?? 0;
     final iconColor = _accountIconColor(context, account.type);
 
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
-        side: BorderSide(
-          color: colors.outlineVariant.withValues(alpha: 0.35),
-        ),
+        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.35)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(15),
+      child: InkWell(
+        onTap: () => _openAccount(account),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  if (account.type == 'Cash' || account.type == 'Wallet')
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(_accountIcon(account.type), color: iconColor),
+                    )
+                  else
+                    BankLogo(bankName: account.bankName, size: 48),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          account.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          account.bankName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Icon(
-                    _accountIcon(account.type),
-                    color: iconColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        account.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+                  PopupMenuButton<String>(
+                    tooltip: 'Account options',
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _showAccountSheet(account: account);
+                      } else if (value == 'delete') {
+                        _deleteAccount(account);
+                      }
+                    },
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined),
+                            SizedBox(width: 10),
+                            Text('Edit Account'),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        account.bankName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurface.withValues(alpha: 0.6),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              color: Colors.red,
+                            ),
+                            SizedBox(width: 10),
+                            Text('Delete Account'),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-                PopupMenuButton<String>(
-                  tooltip: 'Account options',
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      _showAccountSheet(account: account);
-                    } else if (value == 'delete') {
-                      _deleteAccount(account);
-                    }
-                  },
-                  itemBuilder: (context) => const [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit_outlined),
-                          SizedBox(width: 10),
-                          Text('Edit Account'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.red,
-                          ),
-                          SizedBox(width: 10),
-                          Text('Delete Account'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerHighest.withValues(
-                  alpha: 0.30,
-                ),
-                borderRadius: BorderRadius.circular(16),
+                ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${account.type}'
-                    '${account.lastFourDigits == null ? '' : ' •••• ${account.lastFourDigits}'}',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colors.onSurface.withValues(alpha: 0.6),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isCreditCard
-                                  ? 'Credit Limit'
-                                  : 'Balance',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: colors.onSurface.withValues(
-                                  alpha: 0.6,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatAmount(
-                                isCreditCard ? creditLimit : balance,
-                              ),
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest.withValues(alpha: 0.30),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${account.type}'
+                      '${account.lastFourDigits == null ? '' : ' •••• ${account.lastFourDigits}'}',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colors.onSurface.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.w600,
                       ),
-                      if (isCreditCard) ...[
-                        const SizedBox(width: 10),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Outstanding Debt',
-                                textAlign: TextAlign.end,
-                                style:
-                                    theme.textTheme.labelSmall?.copyWith(
+                                isCreditCard ? 'Credit Limit' : 'Balance',
+                                style: theme.textTheme.labelSmall?.copyWith(
                                   color: colors.onSurface.withValues(
                                     alpha: 0.6,
                                   ),
@@ -700,53 +775,92 @@ class _AccountsScreenState extends State<AccountsScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _formatAmount(balance),
-                                textAlign: TextAlign.end,
+                                _formatAmount(
+                                  isCreditCard ? creditLimit : balance,
+                                ),
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: Colors.redAccent,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                  if (isCreditCard) ...[
-                    const SizedBox(height: 14),
-                    const Divider(height: 1),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.check_circle_outline_rounded,
-                          size: 18,
-                          color: Colors.green,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Available Credit',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
+                        if (isCreditCard) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Outstanding Debt',
+                                  textAlign: TextAlign.end,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colors.onSurface.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _formatAmount(balance),
+                                  textAlign: TextAlign.end,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: Colors.redAccent,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        Text(
-                          _formatAmount(availableCredit),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+                        ],
                       ],
                     ),
+                    if (isCreditCard) ...[
+                      const SizedBox(height: 14),
+                      const Divider(height: 1),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 18,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Available Credit',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _formatAmount(availableCredit),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Tap to view transactions  ›',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
