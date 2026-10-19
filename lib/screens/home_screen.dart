@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   int _overviewFaceIndex = 0;
   String _chartPeriod = 'Week';
+  int _weekOffset = 0;
 
   late final AnimationController _flipController;
   late final Animation<double> _flipAnimation;
@@ -952,54 +953,95 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // SPENDING ACTIVITY CHART
   // ------------------------------------------------------------
 
+  String _weekRangeLabel() {
+    final now = DateUtils.dateOnly(DateTime.now());
+    final currentMonday = now.subtract(
+      Duration(days: now.weekday - DateTime.monday),
+    );
+
+    final monday = currentMonday.add(Duration(days: _weekOffset * 7));
+    final sunday = monday.add(const Duration(days: 6));
+
+    return '${_date(monday)} – ${_date(sunday)}';
+  }
+
   List<_ChartPoint> _chartPoints() {
     final now = DateTime.now();
+
+    // Expenses only; exclude income and transfers.
     final expenses = _db.transactions.where(
       (t) => t.type == TransactionType.expense,
     );
 
     if (_chartPeriod == 'Week') {
       final today = DateUtils.dateOnly(now);
-      final monday = today.subtract(Duration(days: today.weekday - 1));
-      const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      final currentMonday = today.subtract(
+        Duration(days: today.weekday - DateTime.monday),
+      );
+
+      final monday = currentMonday.add(Duration(days: _weekOffset * 7));
+
+      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
       return List.generate(7, (i) {
         final day = monday.add(Duration(days: i));
+
         final total = expenses
-            .where((t) => DateUtils.isSameDay(t.date, day))
+            .where((t) {
+              final transactionDay = DateUtils.dateOnly(t.date);
+              return transactionDay == day;
+            })
             .fold<double>(0, (sum, t) => sum + t.amount);
+
         return _ChartPoint(labels[i], total);
       });
     }
 
     if (_chartPeriod == 'Month') {
-      final days = DateTime(now.year, now.month + 1, 0).day;
-      final bucketCount = (days / 7).ceil();
+      final firstOfNextMonth = DateTime(now.year, now.month + 1, 1);
+      final daysInMonth = firstOfNextMonth
+          .subtract(const Duration(days: 1))
+          .day;
+      final bucketCount = (daysInMonth / 7).ceil();
 
       return List.generate(bucketCount, (i) {
-        final firstDay = i * 7 + 1;
-        final lastDay = math.min(firstDay + 7, days + 1);
-        final bucketStart = DateTime(now.year, now.month, firstDay);
-        final bucketEnd = DateTime(now.year, now.month, lastDay);
+        final startDay = i * 7 + 1;
+        final endDay = math.min(startDay + 7, daysInMonth + 1);
+
+        final start = DateTime(now.year, now.month, startDay);
+        final end = DateTime(now.year, now.month, endDay);
 
         final total = expenses
-            .where(
-              (t) =>
-                  !t.date.isBefore(bucketStart) && t.date.isBefore(bucketEnd),
-            )
+            .where((t) => !t.date.isBefore(start) && t.date.isBefore(end))
             .fold<double>(0, (sum, t) => sum + t.amount);
 
-        return _ChartPoint('$firstDay', total);
+        return _ChartPoint('$startDay', total);
       });
     }
 
-    const labels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    const labels = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     return List.generate(12, (i) {
-      final month = i + 1;
+      final start = DateTime(now.year, i + 1, 1);
+      final end = DateTime(now.year, i + 2, 1);
+
       final total = expenses
-          .where((t) => t.date.year == now.year && t.date.month == month)
+          .where((t) => !t.date.isBefore(start) && t.date.isBefore(end))
           .fold<double>(0, (sum, t) => sum + t.amount);
+
       return _ChartPoint(labels[i], total);
     });
   }
@@ -1075,7 +1117,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               }).toList(),
             ),
           ),
-          const SizedBox(height: 16),
+          if (_chartPeriod == 'Week') ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  tooltip: 'Previous week',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    setState(() {
+                      _weekOffset--;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: _text,
+                    size: 25,
+                  ),
+                ),
+                Text(
+                  _weekRangeLabel(),
+                  style: TextStyle(
+                    color: _text,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Next week',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _weekOffset < 0
+                      ? () {
+                          setState(() {
+                            _weekOffset++;
+                          });
+                        }
+                      : null,
+                  icon: Icon(
+                    Icons.chevron_right_rounded,
+                    color: _weekOffset < 0
+                        ? _text
+                        : _muted.withValues(alpha: 0.35),
+                    size: 25,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
           Text(
             _display(total),
             style: TextStyle(
@@ -1087,7 +1177,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 4),
           Text(
-            'Total expenses this ${_chartPeriod.toLowerCase()}',
+            _chartPeriod == 'Week'
+                ? 'Expenses for ${_weekRangeLabel()}'
+                : _chartPeriod == 'Month'
+                ? 'Expenses this month'
+                : 'Expenses this year',
             style: TextStyle(color: _muted, fontSize: 11),
           ),
           const SizedBox(height: 18),
@@ -1342,7 +1436,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (velocity.abs() > 100) _toggleFlipCard();
       },
       child: SizedBox(
-        height: 330,
+        height: 370,
         child: AnimatedBuilder(
           animation: _flipAnimation,
           builder: (context, child) {

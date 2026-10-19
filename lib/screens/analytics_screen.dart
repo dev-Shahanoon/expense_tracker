@@ -1,4 +1,3 @@
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -27,11 +26,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   static const Color red = Color(0xFFFF8585);
   static const Color muted = Color(0xFF82918E);
 
-  late DateTime _selectedMonth;
-  late AnimationController _flipController;
-
-  bool _showDistribution = false;
-
   static const List<Color> _chartColors = [
     Color(0xFF8DF0E2),
     Color(0xFF4ADE80),
@@ -41,6 +35,32 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     Color(0xFF78D8FF),
     Color(0xFFFFDF78),
   ];
+
+  late DateTime _selectedMonth;
+  late AnimationController _flipController;
+
+  bool _showDistribution = false;
+
+  bool get _isDark =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  Color get _pageBackground =>
+      _isDark ? const Color(0xFF101817) : const Color(0xFFF4F8F7);
+
+  Color get _surfaceColor =>
+      _isDark ? const Color(0xFF1B2523) : Colors.white;
+
+  Color get _borderColor =>
+      _isDark ? const Color(0xFF33413E) : const Color(0xFFE0EBE8);
+
+  Color get _primaryText =>
+      _isDark ? const Color(0xFFF0F5F3) : navy;
+
+  Color get _secondaryText =>
+      _isDark ? const Color(0xFFB0BFBB) : muted;
+
+  Color get _progressBackground =>
+      _isDark ? const Color(0xFF354440) : const Color(0xFFEAF2EF);
 
   @override
   void initState() {
@@ -167,9 +187,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   String get _monthLabel {
     const months = [
-      'January', 'February', 'March', 'April',
-      'May', 'June', 'July', 'August',
-      'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     return '${months[_selectedMonth.month - 1]} ${_selectedMonth.year}';
@@ -178,24 +207,27 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F8F7),
+      backgroundColor: _pageBackground,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 22, 20, 32),
           children: [
-            const Text(
+            Text(
               'Analytics',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
-                color: navy,
+                color: _primaryText,
                 letterSpacing: -0.8,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Understand your money at a glance.',
-              style: TextStyle(fontSize: 14, color: muted),
+              style: TextStyle(
+                fontSize: 14,
+                color: _secondaryText,
+              ),
             ),
             const SizedBox(height: 24),
             _buildMonthSelector(),
@@ -219,9 +251,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surfaceColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0EBE8)),
+        border: Border.all(color: _borderColor),
       ),
       child: Row(
         children: [
@@ -234,8 +266,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             child: Text(
               _monthLabel,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: navy,
+              style: TextStyle(
+                color: _primaryText,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -244,7 +276,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           IconButton(
             onPressed: _isCurrentMonth ? null : _nextMonth,
             icon: const Icon(Icons.chevron_right_rounded),
-            color: _isCurrentMonth ? const Color(0xFFD0DAD7) : teal,
+            color: _isCurrentMonth
+                ? (_isDark
+                    ? const Color(0xFF52615D)
+                    : const Color(0xFFD0DAD7))
+                : teal,
           ),
         ],
       ),
@@ -292,7 +328,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         borderRadius: BorderRadius.circular(36),
         boxShadow: [
           BoxShadow(
-            color: teal.withValues(alpha: 0.22),
+            color: teal.withValues(alpha: _isDark ? 0.12 : 0.22),
             blurRadius: 25,
             offset: const Offset(0, 12),
           ),
@@ -320,16 +356,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   ),
                 ),
               ),
-              _flipButton(
-                Icons.donut_large_rounded,
-                'Distribution',
-              ),
+              _flipButton(Icons.donut_large_rounded, 'Distribution'),
             ],
           ),
           const SizedBox(height: 25),
           const Text(
             'Net change',
-            style: TextStyle(color: Color.fromARGB(255, 240, 237, 237), fontSize: 13),
+            style: TextStyle(
+              color: Color(0xFFF0EDED),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 7),
           FittedBox(
@@ -338,7 +374,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             child: Text(
               '${_net >= 0 ? '+' : '-'}${_money(_net.abs())}',
               style: TextStyle(
-                color: _net >= 0 ? Colors.white : const Color.fromARGB(221, 224, 67, 67),
+                color: _net >= 0
+                    ? Colors.white
+                    : const Color.fromARGB(228, 204, 63, 63),
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -1,
@@ -356,9 +394,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               Expanded(
                 child: _overviewMetric(
                   icon: Icons.south_west_rounded,
-                  label: 'Income', 
+                  label: 'Income',
                   amount: _income,
-                  color: const Color.fromARGB(255, 11, 232, 45),
+                  color: const Color.fromARGB(255, 10, 230, 57),
                 ),
               ),
               const SizedBox(width: 12),
@@ -367,7 +405,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   icon: Icons.north_east_rounded,
                   label: 'Expenses',
                   amount: _expense,
-                  color: const Color.fromARGB(255, 214, 29, 0),
+                  color: const Color.fromARGB(255, 228, 37, 12),
                 ),
               ),
             ],
@@ -659,10 +697,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Quick insights',
           style: TextStyle(
-            color: navy,
+            color: _primaryText,
             fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
@@ -715,9 +753,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE0EBE8)),
+        border: Border.all(color: _borderColor),
       ),
       child: Row(
         children: [
@@ -740,15 +778,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: muted, fontSize: 11),
+                  style: TextStyle(
+                    color: _secondaryText,
+                    fontSize: 11,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: navy,
+                  style: TextStyle(
+                    color: _primaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
@@ -767,34 +808,37 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surfaceColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE0EBE8)),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Category breakdown',
             style: TextStyle(
-              color: navy,
+              color: _primaryText,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 5),
-          const Text(
+          Text(
             'Where your money went this month',
-            style: TextStyle(color: muted, fontSize: 12),
+            style: TextStyle(
+              color: _secondaryText,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 20),
           if (categories.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(
                   'No expense records for this month.',
-                  style: TextStyle(color: muted),
+                  style: TextStyle(color: _secondaryText),
                 ),
               ),
             )
@@ -830,8 +874,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         Expanded(
                           child: Text(
                             _categoryName(entry.key),
-                            style: const TextStyle(
-                              color: navy,
+                            style: TextStyle(
+                              color: _primaryText,
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
@@ -839,8 +883,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         ),
                         Text(
                           _money(entry.value),
-                          style: const TextStyle(
-                            color: navy,
+                          style: TextStyle(
+                            color: _primaryText,
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
                           ),
@@ -853,7 +897,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       child: LinearProgressIndicator(
                         value: percentage.clamp(0.0, 1.0),
                         minHeight: 7,
-                        backgroundColor: const Color(0xFFEAF2EF),
+                        backgroundColor: _progressBackground,
                         valueColor:
                             AlwaysStoppedAnimation<Color>(color),
                       ),
@@ -863,8 +907,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       alignment: Alignment.centerRight,
                       child: Text(
                         '${(percentage * 100).toStringAsFixed(1)}% of expenses',
-                        style: const TextStyle(
-                          color: muted,
+                        style: TextStyle(
+                          color: _secondaryText,
                           fontSize: 10,
                         ),
                       ),
@@ -882,8 +926,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: const Color(0xFFE1F7F2),
+        color: _isDark
+            ? const Color(0xFF173B36)
+            : const Color(0xFFE1F7F2),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isDark
+              ? const Color(0xFF28564E)
+              : const Color(0xFFC7EDE5),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,8 +945,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             child: Text(
               '${_transferTransactions.length} transfer(s) this month. '
               'Transfers are shown separately and are not counted as income or expenses.',
-              style: const TextStyle(
-                color: Color(0xFF176B62),
+              style: TextStyle(
+                color: _isDark
+                    ? const Color(0xFFBDEDE5)
+                    : const Color(0xFF176B62),
                 fontSize: 12,
                 height: 1.5,
               ),
@@ -919,6 +972,7 @@ class _DonutPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     const strokeWidth = 16.0;
+
     final rect = Rect.fromLTWH(
       strokeWidth / 2,
       strokeWidth / 2,
@@ -931,7 +985,10 @@ class _DonutPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final total = values.fold<double>(0, (sum, value) => sum + value);
+    final total = values.fold<double>(
+      0,
+      (sum, value) => sum + value,
+    );
 
     if (total <= 0) {
       paint.color = const Color(0xFFBDEDE5);
