@@ -18,6 +18,7 @@ Future<void> main() async {
   await Hive.openBox('app_settings');
 
   final themeController = ThemeController();
+await themeController.init();
 
   runApp(
     ExpenseTrackerApp(
@@ -72,13 +73,11 @@ class AppLockGate extends StatefulWidget {
   State<AppLockGate> createState() => _AppLockGateState();
 }
 
-class _AppLockGateState extends State<AppLockGate>
-    with WidgetsBindingObserver {
+class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   static const String _settingsBoxName = 'app_settings';
   static const String _appLockKey = 'appLockEnabled';
 
-  final BiometricService _biometricService =
-      BiometricService();
+  final BiometricService _biometricService = BiometricService();
 
   bool _locked = true;
   bool _checkingLock = true;
@@ -114,11 +113,7 @@ class _AppLockGateState extends State<AppLockGate>
 
     final box = Hive.box(_settingsBoxName);
 
-    return box.get(
-          _appLockKey,
-          defaultValue: false,
-        ) ==
-        true;
+    return box.get(_appLockKey, defaultValue: false) == true;
   }
 
   Future<void> _checkLockStatus() async {
@@ -168,8 +163,7 @@ class _AppLockGateState extends State<AppLockGate>
       _locked = true;
     });
 
-    final authenticated =
-        await _biometricService.authenticate();
+    final authenticated = await _biometricService.authenticate();
 
     if (!mounted) {
       return;
@@ -187,9 +181,7 @@ class _AppLockGateState extends State<AppLockGate>
   }
 
   @override
-  void didChangeAppLifecycleState(
-    AppLifecycleState state,
-  ) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     // IMPORTANT:
     // Do not authenticate on "inactive".
     // Android can enter "inactive" while the biometric
@@ -208,9 +200,7 @@ class _AppLockGateState extends State<AppLockGate>
     }
 
     if (state == AppLifecycleState.resumed) {
-      if (_hasStarted &&
-          _wasBackgrounded &&
-          _isAppLockEnabled()) {
+      if (_hasStarted && _wasBackgrounded && _isAppLockEnabled()) {
         _wasBackgrounded = false;
         _authenticate();
       }
@@ -220,11 +210,7 @@ class _AppLockGateState extends State<AppLockGate>
   @override
   Widget build(BuildContext context) {
     if (_checkingLock) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_locked) {

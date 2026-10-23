@@ -13,6 +13,7 @@ import 'add_transaction_screen.dart';
 import 'analytics_screen.dart';
 import 'settings_screen.dart';
 import 'transactions_screen.dart';
+import 'loans_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final DatabaseService databaseService;
@@ -175,6 +176,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => AccountsScreen(databaseService: _db)),
     );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openLoans() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => LoansScreen(databaseService: _db)),
+    );
+
     if (mounted) setState(() {});
   }
 
@@ -1648,105 +1657,140 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+// ------------------------------------------------------------
+// FLOATING PILL BOTTOM NAVIGATION
+// ------------------------------------------------------------
 
-  // ------------------------------------------------------------
-  // BOTTOM NAVIGATION
-  // ------------------------------------------------------------
+Widget _bottomNavigation() {
+  final accent = _dark
+      ? const Color(0xFF35D6C3)
+      : const Color(0xFF087F73);
 
-  Widget _bottomNavigation() {
-    final accent = _dark ? const Color(0xFF35D6C3) : const Color(0xFF087F73);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: _surface,
-        border: Border(top: BorderSide(color: _border)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: _dark ? 0.10 : 0.035),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 72,
-          child: Row(
-            children: [
-              Expanded(
-                child: _navItem(
-                  icon: Icons.account_balance_rounded,
-                  label: 'Accounts',
-                  onTap: _openAccounts,
-                ),
+  return Container(
+    color: _background,
+    child: SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.circular(36),
+          border: Border.all(color: _border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: _dark ? 0.16 : 0.055,
               ),
-              Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: 58,
-                    height: 58,
-                    child: FloatingActionButton(
-                      heroTag: 'home_add_transaction',
-                      onPressed: _openAdd,
-                      elevation: 0,
-                      backgroundColor: accent,
-                      foregroundColor: _dark
-                          ? const Color(0xFF102321)
-                          : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _navItem(
+                icon: Icons.account_balance_rounded,
+                label: 'Accounts',
+                onTap: _openAccounts,
+              ),
+            ),
+            Expanded(
+              child: _navItem(
+                icon: Icons.receipt_long_rounded,
+                label: 'Activity',
+                onTap: _openTransactions,
+              ),
+            ),
+
+            // Centered pill-shaped Add button
+            Expanded(
+              child: Center(
+                child: SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: Material(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(27),
+                    child: InkWell(
+                      onTap: _openAdd,
+                      borderRadius: BorderRadius.circular(27),
+                      child: const Center(
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 30,
+                          color: Colors.white,
+                        ),
                       ),
-                      tooltip: 'Add transaction',
-                      child: const Icon(Icons.add_rounded, size: 31),
                     ),
                   ),
                 ),
               ),
-              Expanded(
-                child: _navItem(
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Transactions',
-                  onTap: _openTransactions,
-                ),
+            ),
+
+            Expanded(
+              child: _navItem(
+                icon: Icons.analytics_rounded,
+                label: 'Analytics',
+                onTap: _openAnalytics,
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: _navItem(
+                icon: Icons.payments_outlined,
+                label: 'Loans',
+                onTap: _openLoans,
+              ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox.expand(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 22, color: _muted),
-              const SizedBox(height: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  color: _muted,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
+Widget _navItem({
+  required IconData icon,
+  required String label,
+  required VoidCallback onTap,
+}) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(28),
+      child: SizedBox.expand(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 21,
+              color: _muted,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: _muted,
+                fontSize: 9,
+                height: 1.1,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   // ------------------------------------------------------------
   // HOME SCREEN
   // ------------------------------------------------------------
@@ -1790,19 +1834,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Analytics',
-            onPressed: _openAnalytics,
-            icon: Icon(Icons.insights_rounded, color: _text),
-          ),
-          IconButton(
-            tooltip: 'Settings',
-            onPressed: _openSettings,
-            icon: Icon(Icons.tune_rounded, color: _text),
-          ),
-          const SizedBox(width: 6),
-        ],
+        
+actions: [
+  IconButton(
+    tooltip: 'Settings',
+    onPressed: _openSettings,
+    icon: Icon(Icons.tune_rounded, color: _text),
+  ),
+  const SizedBox(width: 6),
+],
+
       ),
       body: SafeArea(
         child: RefreshIndicator(

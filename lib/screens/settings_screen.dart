@@ -28,8 +28,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final BiometricService _biometricService =
-      BiometricService();
+  final BiometricService _biometricService = BiometricService();
 
   bool _appLockEnabled = false;
   bool _settingsReady = false;
@@ -47,8 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final box = Hive.box('app_settings');
 
-    final enabled =
-        box.get('appLockEnabled', defaultValue: false) as bool;
+    final enabled = box.get('appLockEnabled', defaultValue: false) as bool;
 
     if (!mounted) {
       return;
@@ -78,9 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text(
             'Choose Theme',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -127,33 +123,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
   }) {
     final theme = Theme.of(context);
-    final selected =
-        widget.themeController.themeMode == mode;
+    final selected = widget.themeController.themeMode == mode;
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 4,
-        vertical: 2,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       leading: Container(
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: theme.colorScheme.primary
-              .withValues(alpha: 0.10),
+          color: theme.colorScheme.primary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(13),
         ),
-        child: Icon(
-          icon,
-          color: theme.colorScheme.primary,
-        ),
+        child: Icon(icon, color: theme.colorScheme.primary),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle),
       trailing: Icon(
         selected
@@ -176,29 +159,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text(
             'Currency',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: _dialogIcon(
-                  context,
-                  Icons.currency_rupee_rounded,
-                ),
+                leading: _dialogIcon(context, Icons.currency_rupee_rounded),
                 title: const Text(
                   'Indian Rupee',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 subtitle: const Text('INR • ₹'),
                 trailing: Icon(
                   Icons.check_circle_rounded,
-                  color:
-                      Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 onTap: () {
                   Navigator.of(dialogContext).pop();
@@ -211,24 +186,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _dialogIcon(
-    BuildContext context,
-    IconData icon,
-  ) {
+  Widget _dialogIcon(BuildContext context, IconData icon) {
     final theme = Theme.of(context);
 
     return Container(
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary
-            .withValues(alpha: 0.10),
+        color: theme.colorScheme.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(13),
       ),
-      child: Icon(
-        icon,
-        color: theme.colorScheme.primary,
-      ),
+      child: Icon(icon, color: theme.colorScheme.primary),
     );
   }
 
@@ -239,9 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text(
             'Notifications',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
           content: const Text(
             'Expense reminders and smart alerts '
@@ -268,10 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final box = Hive.box('app_settings');
 
     if (!enabled) {
-      await box.put(
-        'appLockEnabled',
-        false,
-      );
+      await box.put('appLockEnabled', false);
 
       if (!mounted) {
         return;
@@ -284,8 +247,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    final available =
-        await _biometricService.isAvailable();
+    final available = await _biometricService.isAvailable();
 
     if (!mounted) {
       return;
@@ -296,9 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context: context,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text(
-              'Biometrics unavailable',
-            ),
+            title: const Text('Biometrics unavailable'),
             content: const Text(
               'Your device does not have a supported '
               'biometric authentication method available.',
@@ -318,8 +278,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    final authenticated =
-        await _biometricService.authenticate();
+    final authenticated = await _biometricService.authenticate();
 
     if (!mounted) {
       return;
@@ -329,10 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    await box.put(
-      'appLockEnabled',
-      true,
-    );
+    await box.put('appLockEnabled', true);
 
     if (!mounted) {
       return;
@@ -344,11 +300,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showDataInfo() async {
-    final accounts =
-        widget.databaseService.accounts.length;
+    final accounts = widget.databaseService.accounts.length;
 
-    final transactions =
-        widget.databaseService.transactions.length;
+    final transactions = widget.databaseService.transactions.length;
 
     await showDialog<void>(
       context: context,
@@ -356,9 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: const Text(
             'Your Data',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -381,9 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'Your financial data is stored locally '
                 'on this device.',
                 style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -415,30 +365,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary
-                .withValues(alpha: 0.10),
+            color: theme.colorScheme.primary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: Icon(
-            icon,
-            color: theme.colorScheme.primary,
-          ),
+          child: Icon(icon, color: theme.colorScheme.primary),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
       ],
     );
   }
@@ -453,46 +392,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      final transactions =
-          widget.databaseService.transactions;
+      final transactions = widget.databaseService.transactions;
 
       final buffer = StringBuffer();
 
-      buffer.writeln(
-        'Date,Type,Amount,Account,To Account,Category,Note',
-      );
+      buffer.writeln('Date,Type,Amount,Account,To Account,Category,Note');
 
       for (final transaction in transactions) {
-        final account =
-            widget.databaseService.getAccount(
+        final account = widget.databaseService.getAccount(
           transaction.accountId,
         );
 
         Account? destination;
 
         if (transaction.toAccountId != null) {
-          destination =
-              widget.databaseService.getAccount(
+          destination = widget.databaseService.getAccount(
             transaction.toAccountId!,
           );
         }
 
         final type = transaction.type.name;
 
-        final accountName =
-            account?.name ?? 'Unknown';
+        final accountName = account?.name ?? 'Unknown';
 
-        final destinationName =
-            destination?.name ?? '';
+        final destinationName = destination?.name ?? '';
 
-        final category =
-            transaction.categoryId;
+        final category = transaction.categoryId;
 
-        final note =
-            transaction.note.replaceAll(
-          '"',
-          '""',
-        );
+        final note = transaction.note.replaceAll('"', '""');
 
         buffer.writeln(
           '"${transaction.date.toIso8601String()}",'
@@ -505,16 +432,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
 
-      final directory =
-          await getTemporaryDirectory();
+      final directory = await getTemporaryDirectory();
 
-      final file = File(
-        '${directory.path}/expense_tracker_export.csv',
-      );
+      final file = File('${directory.path}/expense_tracker_export.csv');
 
-      await file.writeAsString(
-        buffer.toString(),
-      );
+      await file.writeAsString(buffer.toString());
 
       if (!mounted) {
         return;
@@ -522,9 +444,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       await SharePlus.instance.share(
         ShareParams(
-          files: [
-            XFile(file.path),
-          ],
+          files: [XFile(file.path)],
           text: 'Expense Tracker data export',
         ),
       );
@@ -533,13 +453,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Export failed: $error',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Export failed: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -562,57 +478,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final backup = {
         'app': 'Expense Tracker',
         'version': '1.0.0',
-        'createdAt':
-            DateTime.now().toIso8601String(),
+        'createdAt': DateTime.now().toIso8601String(),
         'accounts': widget.databaseService.accounts
             .map((account) => account.toMap())
             .toList(),
-        'transactions':
-            widget.databaseService.transactions
-                .map((transaction) =>
-                    transaction.toMap())
-                .toList(),
+        'transactions': widget.databaseService.transactions
+            .map((transaction) => transaction.toMap())
+            .toList(),
       };
 
-      final jsonString =
-          const JsonEncoder.withIndent('  ')
-              .convert(backup);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(backup);
 
-      final directory =
-          await getTemporaryDirectory();
+      final directory = await getTemporaryDirectory();
 
-      final file = File(
-        '${directory.path}/expense_tracker_backup.json',
-      );
+      final file = File('${directory.path}/expense_tracker_backup.json');
 
-      await file.writeAsString(
-        jsonString,
-      );
+      await file.writeAsString(jsonString);
 
       if (!mounted) {
         return;
       }
 
       await SharePlus.instance.share(
-        ShareParams(
-          files: [
-            XFile(file.path),
-          ],
-          text: 'Expense Tracker backup',
-        ),
+        ShareParams(files: [XFile(file.path)], text: 'Expense Tracker backup'),
       );
     } catch (error) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Backup failed: $error',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Backup failed: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -645,25 +542,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (path == null || path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Could not access the selected backup file.',
-          ),
+          content: Text('Could not access the selected backup file.'),
         ),
       );
 
       return;
     }
 
-    final confirmed =
-        await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text(
             'Restore Backup?',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
           content: const Text(
             'Restoring this backup will replace your '
@@ -699,68 +591,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final file = File(path);
 
-      final jsonString =
-          await file.readAsString();
+      final jsonString = await file.readAsString();
 
-      final decoded =
-          jsonDecode(jsonString);
+      final decoded = jsonDecode(jsonString);
 
       if (decoded is! Map) {
-        throw const FormatException(
-          'Invalid backup format.',
-        );
+        throw const FormatException('Invalid backup format.');
       }
 
-      final accountsData =
-          decoded['accounts'];
+      final accountsData = decoded['accounts'];
 
-      final transactionsData =
-          decoded['transactions'];
+      final transactionsData = decoded['transactions'];
 
-      if (accountsData is! List ||
-          transactionsData is! List) {
-        throw const FormatException(
-          'Invalid backup file.',
-        );
+      if (accountsData is! List || transactionsData is! List) {
+        throw const FormatException('Invalid backup file.');
       }
 
       final accounts = accountsData
-          .map(
-            (item) => Account.fromMap(
-              Map<String, dynamic>.from(item),
-            ),
-          )
+          .map((item) => Account.fromMap(Map<String, dynamic>.from(item)))
           .toList();
 
       final transactions = transactionsData
           .map(
-            (item) => TransactionModel.fromMap(
-              Map<String, dynamic>.from(item),
-            ),
+            (item) => TransactionModel.fromMap(Map<String, dynamic>.from(item)),
           )
           .toList();
 
-      final accountsBox =
-          Hive.box('accounts');
+      final accountsBox = Hive.box('accounts');
 
-      final transactionsBox =
-          Hive.box('transactions');
+      final transactionsBox = Hive.box('transactions');
 
       await accountsBox.clear();
       await transactionsBox.clear();
 
       for (final account in accounts) {
-        await accountsBox.put(
-          account.id,
-          account.toMap(),
-        );
+        await accountsBox.put(account.id, account.toMap());
       }
 
       for (final transaction in transactions) {
-        await transactionsBox.put(
-          transaction.id,
-          transaction.toMap(),
-        );
+        await transactionsBox.put(transaction.id, transaction.toMap());
       }
 
       await widget.databaseService.init();
@@ -770,11 +639,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Backup restored successfully.',
-          ),
-        ),
+        const SnackBar(content: Text('Backup restored successfully.')),
       );
 
       setState(() {});
@@ -783,13 +648,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Restore failed: $error',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Restore failed: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -808,16 +669,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .primary
-              .withValues(alpha: 0.10),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(
           Icons.account_balance_wallet_rounded,
-          color:
-              Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.primary,
           size: 30,
         ),
       ),
@@ -830,17 +687,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _sectionTitle(
-    BuildContext context,
-    String title,
-  ) {
+  Widget _sectionTitle(BuildContext context, String title) {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 4,
-        bottom: 10,
-      ),
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
@@ -853,10 +704,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _iconBox({
-    required IconData icon,
-    required Color color,
-  }) {
+  Widget _iconBox({required IconData icon, required Color color}) {
     return Container(
       width: 48,
       height: 48,
@@ -864,11 +712,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: color.withValues(alpha: 0.11),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Icon(
-        icon,
-        color: color,
-        size: 24,
-      ),
+      child: Icon(icon, color: color, size: 24),
     );
   }
 
@@ -888,21 +732,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 16,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         child: Row(
           children: [
-            _iconBox(
-              icon: icon,
-              color: iconColor,
-            ),
+            _iconBox(icon: icon, color: iconColor),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
@@ -918,8 +755,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.5,
-                      color: theme.colorScheme
-                          .onSurfaceVariant,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -931,8 +767,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ? Icon(
                         Icons.chevron_right_rounded,
                         size: 27,
-                        color: theme.colorScheme
-                            .onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       )
                     : const SizedBox.shrink()),
           ],
@@ -952,14 +787,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: theme.colorScheme.outline
-              .withValues(alpha: 0.16),
+          color: theme.colorScheme.outline.withValues(alpha: 0.16),
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
@@ -968,29 +800,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 1,
       thickness: 1,
       indent: 82,
-      color: Theme.of(context)
-          .colorScheme
-          .outline
-          .withValues(alpha: 0.12),
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12),
     );
   }
 
   Widget _buildAppHeader(BuildContext context) {
     final theme = Theme.of(context);
 
-    final cardColor =
-        theme.brightness == Brightness.dark
-            ? const Color(0xFF182235)
-            : const Color(0xFF17243A);
+    final cardColor = theme.brightness == Brightness.dark
+        ? const Color(0xFF182235)
+        : const Color(0xFF17243A);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [
@@ -1000,10 +826,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color:
-                    Colors.white.withValues(alpha: 0.10),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
             ),
             child: const Icon(
               Icons.account_balance_wallet_rounded,
@@ -1014,8 +837,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(width: 16),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Expense Tracker',
@@ -1030,9 +852,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   'Manage your money simply.',
                   style: TextStyle(
-                    color: Colors.white.withValues(
-                      alpha: 0.68,
-                    ),
+                    color: Colors.white.withValues(alpha: 0.68),
                     fontSize: 14.5,
                   ),
                 ),
@@ -1040,21 +860,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 9,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color:
-                  Colors.white.withValues(alpha: 0.09),
+              color: Colors.white.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(13),
             ),
             child: Text(
               '1.0.0',
               style: TextStyle(
-                color: Colors.white.withValues(
-                  alpha: 0.82,
-                ),
+                color: Colors.white.withValues(alpha: 0.82),
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
               ),
@@ -1070,40 +884,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
 
     if (!_settingsReady) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Settings',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
         child: ListView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            36,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 36),
           children: [
             _buildAppHeader(context),
 
             const SizedBox(height: 28),
 
-            _sectionTitle(
-              context,
-              'Appearance',
-            ),
+            _sectionTitle(context, 'Appearance'),
 
             _settingsGroup(
               context: context,
@@ -1121,10 +921,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 28),
 
-            _sectionTitle(
-              context,
-              'Preferences',
-            ),
+            _sectionTitle(context, 'Preferences'),
 
             _settingsGroup(
               context: context,
@@ -1140,12 +937,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _divider(context),
                 _settingsTile(
                   context: context,
-                  icon:
-                      Icons.notifications_active_rounded,
+                  icon: Icons.notifications_active_rounded,
                   iconColor: const Color(0xFFFFB84D),
                   title: 'Notifications',
-                  subtitle:
-                      'Expense reminders and alerts',
+                  subtitle: 'Expense reminders and alerts',
                   onTap: _showNotificationsInfo,
                 ),
               ],
@@ -1153,10 +948,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 28),
 
-            _sectionTitle(
-              context,
-              'Security',
-            ),
+            _sectionTitle(context, 'Security'),
 
             _settingsGroup(
               context: context,
@@ -1166,8 +958,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.fingerprint_rounded,
                   iconColor: const Color(0xFF6FA8FF),
                   title: 'Biometric App Lock',
-                  subtitle:
-                      'Require biometrics to open the app',
+                  subtitle: 'Require biometrics to open the app',
                   showArrow: false,
                   trailing: Switch.adaptive(
                     value: _appLockEnabled,
@@ -1179,10 +970,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 28),
 
-            _sectionTitle(
-              context,
-              'Data',
-            ),
+            _sectionTitle(context, 'Data'),
 
             _settingsGroup(
               context: context,
@@ -1192,8 +980,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.storage_rounded,
                   iconColor: const Color(0xFFB58CFF),
                   title: 'Your Data',
-                  subtitle:
-                      'View your local accounts and transactions',
+                  subtitle: 'View your local accounts and transactions',
                   onTap: _showDataInfo,
                 ),
                 _divider(context),
@@ -1202,25 +989,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.ios_share_rounded,
                   iconColor: const Color(0xFF4DB6FF),
                   title: 'Export Data',
-                  subtitle:
-                      'Export financial records as CSV',
-                  onTap:
-                      _exporting ? null : _exportData,
+                  subtitle: 'Export financial records as CSV',
+                  onTap: _exporting ? null : _exportData,
                   showArrow: false,
                   trailing: _exporting
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
                       : Icon(
                           Icons.chevron_right_rounded,
                           size: 27,
-                          color: theme.colorScheme
-                              .onSurfaceVariant,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                 ),
                 _divider(context),
@@ -1229,25 +1010,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.cloud_upload_rounded,
                   iconColor: const Color(0xFF63C5DA),
                   title: 'Backup Data',
-                  subtitle:
-                      'Create a JSON backup of your data',
-                  onTap:
-                      _backingUp ? null : _backupData,
+                  subtitle: 'Create a JSON backup of your data',
+                  onTap: _backingUp ? null : _backupData,
                   showArrow: false,
                   trailing: _backingUp
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
                       : Icon(
                           Icons.chevron_right_rounded,
                           size: 27,
-                          color: theme.colorScheme
-                              .onSurfaceVariant,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                 ),
                 _divider(context),
@@ -1256,25 +1031,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.cloud_download_rounded,
                   iconColor: const Color(0xFF8FA7FF),
                   title: 'Restore Data',
-                  subtitle:
-                      'Restore accounts and transactions',
-                  onTap:
-                      _restoring ? null : _restoreData,
+                  subtitle: 'Restore accounts and transactions',
+                  onTap: _restoring ? null : _restoreData,
                   showArrow: false,
                   trailing: _restoring
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
                         )
                       : Icon(
                           Icons.chevron_right_rounded,
                           size: 27,
-                          color: theme.colorScheme
-                              .onSurfaceVariant,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                 ),
               ],
@@ -1282,10 +1051,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 28),
 
-            _sectionTitle(
-              context,
-              'About',
-            ),
+            _sectionTitle(context, 'About'),
 
             _settingsGroup(
               context: context,
@@ -1295,8 +1061,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.auto_awesome_rounded,
                   iconColor: const Color(0xFFFF8FC7),
                   title: 'About Expense Tracker',
-                  subtitle:
-                      'Version 1.0.0 • Built with Flutter',
+                  subtitle: 'Version 1.0.0 • Built with Flutter',
                   onTap: _showAbout,
                 ),
               ],
@@ -1310,9 +1075,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: theme.colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.55),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.55,
+                  ),
                 ),
               ),
             ),
@@ -1324,9 +1089,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'Manage your money simply.',
                 style: TextStyle(
                   fontSize: 11.5,
-                  color: theme.colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.40),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.40,
+                  ),
                 ),
               ),
             ),

@@ -5,10 +5,7 @@ import '../services/biometric_service.dart';
 class AppLockScreen extends StatefulWidget {
   final VoidCallback onAuthenticated;
 
-  const AppLockScreen({
-    super.key,
-    required this.onAuthenticated,
-  });
+  const AppLockScreen({super.key, required this.onAuthenticated});
 
   @override
   State<AppLockScreen> createState() => _AppLockScreenState();
@@ -37,8 +34,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
       _authenticating = true;
     });
 
-    final authenticated =
-        await _biometricService.authenticate();
+    final authenticated = await _biometricService.authenticate();
 
     if (!mounted) {
       return;
@@ -63,22 +59,15 @@ class _AppLockScreenState extends State<AppLockScreen> {
         ? const Color(0xFF182235)
         : const Color(0xFF17243A);
 
-    final secondaryText = colorScheme.onSurface.withValues(
-      alpha: 0.60,
-    );
+    final secondaryText = colorScheme.onSurface.withValues(alpha: 0.60);
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 28,
-              vertical: 32,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 420,
-              ),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -91,9 +80,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: heroColor.withValues(
-                            alpha: 0.18,
-                          ),
+                          color: heroColor.withValues(alpha: 0.18),
                           blurRadius: 30,
                           offset: const Offset(0, 12),
                         ),
@@ -137,15 +124,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(22),
                     decoration: BoxDecoration(
-                      color: theme
-                          .colorScheme
-                          .surfaceContainerHighest
+                      color: theme.colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.38),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: colorScheme.outline.withValues(
-                          alpha: 0.10,
-                        ),
+                        color: colorScheme.outline.withValues(alpha: 0.10),
                       ),
                     ),
                     child: Column(
@@ -154,10 +137,8 @@ class _AppLockScreenState extends State<AppLockScreen> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary
-                                .withValues(alpha: 0.10),
-                            borderRadius:
-                                BorderRadius.circular(15),
+                            color: colorScheme.primary.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                           child: Icon(
                             Icons.lock_outline_rounded,
@@ -195,12 +176,8 @@ class _AppLockScreenState extends State<AppLockScreen> {
                           width: double.infinity,
                           height: 52,
                           child: FilledButton.icon(
-                            onPressed: _authenticating
-                                ? null
-                                : _authenticate,
-                            icon: const Icon(
-                              Icons.fingerprint_rounded,
-                            ),
+                            onPressed: _authenticating ? null : _authenticate,
+                            icon: const Icon(Icons.fingerprint_rounded),
                             label: Text(
                               _authenticating
                                   ? 'Authenticating...'
@@ -222,8 +199,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface
-                          .withValues(alpha: 0.42),
+                      color: colorScheme.onSurface.withValues(alpha: 0.42),
                     ),
                   ),
                 ],

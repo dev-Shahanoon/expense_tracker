@@ -41,15 +41,12 @@ class Account {
       name: map['name'] as String,
       bankName: map['bankName'] as String,
       type: map['type'] as String,
-      openingBalance:
-          (map['openingBalance'] as num).toDouble(),
+      openingBalance: (map['openingBalance'] as num).toDouble(),
       lastFourDigits: map['lastFourDigits'] as String?,
       creditLimit: (map['creditLimit'] as num?)?.toDouble(),
       billingDueDate: map['billingDueDate'] == null
           ? null
-          : DateTime.tryParse(
-              map['billingDueDate'] as String,
-            ),
+          : DateTime.tryParse(map['billingDueDate'] as String),
     );
   }
 }

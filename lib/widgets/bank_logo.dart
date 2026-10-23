@@ -1,15 +1,10 @@
-
 import 'package:flutter/material.dart';
 
 class BankLogo extends StatelessWidget {
   final String? bankName;
   final double size;
 
-  const BankLogo({
-    super.key,
-    required this.bankName,
-    this.size = 44,
-  });
+  const BankLogo({super.key, required this.bankName, this.size = 44});
 
   static const Map<String, String> _logos = {
     'sbi': 'assets/banks/sbi.png',

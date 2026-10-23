@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../data/categories.dart';
@@ -7,13 +6,7 @@ import '../models/transaction.dart';
 import '../services/database_service.dart';
 import 'transaction_details_screen.dart';
 
-enum TransactionDateFilter {
-  all,
-  today,
-  thisWeek,
-  thisMonth,
-  custom,
-}
+enum TransactionDateFilter { all, today, thisWeek, thisMonth, custom }
 
 enum TransactionSortOption {
   newestFirst,
@@ -25,21 +18,16 @@ enum TransactionSortOption {
 class TransactionsScreen extends StatefulWidget {
   final DatabaseService databaseService;
 
-  const TransactionsScreen({
-    super.key,
-    required this.databaseService,
-  });
+  const TransactionsScreen({super.key, required this.databaseService});
 
   @override
-  State<TransactionsScreen> createState() =>
-      _TransactionsScreenState();
+  State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
   TransactionType? _selectedType;
   TransactionDateFilter _dateFilter = TransactionDateFilter.all;
-  TransactionSortOption _sortOption =
-      TransactionSortOption.newestFirst;
+  TransactionSortOption _sortOption = TransactionSortOption.newestFirst;
 
   DateTime? _customStartDate;
   DateTime? _customEndDate;
@@ -47,8 +35,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   double? _maximumAmount;
   String? _selectedAccountId;
 
-  final TextEditingController _searchController =
-      TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   String _searchQuery = '';
 
@@ -77,8 +64,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // HELPERS
   // ------------------------------------------------------------
 
-  String _formatAmount(double amount) =>
-      amount.toStringAsFixed(2);
+  String _formatAmount(double amount) => amount.toStringAsFixed(2);
 
   String _formatShortDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/'
@@ -89,8 +75,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final hour = date.hour == 0
         ? 12
         : date.hour > 12
-            ? date.hour - 12
-            : date.hour;
+        ? date.hour - 12
+        : date.hour;
 
     final minute = date.minute.toString().padLeft(2, '0');
     final period = date.hour >= 12 ? 'PM' : 'AM';
@@ -99,8 +85,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   String _getAccountName(String id) =>
-      widget.databaseService.getAccount(id)?.name ??
-      'Unknown Account';
+      widget.databaseService.getAccount(id)?.name ?? 'Unknown Account';
 
   String _getCategoryName(String id) {
     for (final category in expenseCategories) {
@@ -143,10 +128,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
-  Color _getTransactionColor(
-    BuildContext context,
-    TransactionType type,
-  ) {
+  Color _getTransactionColor(BuildContext context, TransactionType type) {
     switch (type) {
       case TransactionType.income:
         return const Color(0xFF22C55E);
@@ -164,23 +146,20 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // ------------------------------------------------------------
 
   List<TransactionModel> get _filteredTransactions {
-    final filtered = widget.databaseService.transactions.where(
-      (transaction) {
-        if (_selectedType != null &&
-            transaction.type != _selectedType) {
-          return false;
-        }
+    final filtered = widget.databaseService.transactions.where((transaction) {
+      if (_selectedType != null && transaction.type != _selectedType) {
+        return false;
+      }
 
-        if (!_matchesSearch(transaction) ||
-            !_matchesDateFilter(transaction) ||
-            !_matchesAmountFilter(transaction) ||
-            !_matchesAccountFilter(transaction)) {
-          return false;
-        }
+      if (!_matchesSearch(transaction) ||
+          !_matchesDateFilter(transaction) ||
+          !_matchesAmountFilter(transaction) ||
+          !_matchesAccountFilter(transaction)) {
+        return false;
+      }
 
-        return true;
-      },
-    ).toList();
+      return true;
+    }).toList();
 
     switch (_sortOption) {
       case TransactionSortOption.newestFirst:
@@ -234,9 +213,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
       case TransactionDateFilter.thisWeek:
         final today = DateTime(now.year, now.month, now.day);
-        final start = today.subtract(
-          Duration(days: today.weekday - 1),
-        );
+        final start = today.subtract(Duration(days: today.weekday - 1));
         final end = start.add(const Duration(days: 7));
 
         return !date.isBefore(start) && date.isBefore(end);
@@ -270,13 +247,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   bool _matchesAmountFilter(TransactionModel transaction) {
-    if (_minimumAmount != null &&
-        transaction.amount < _minimumAmount!) {
+    if (_minimumAmount != null && transaction.amount < _minimumAmount!) {
       return false;
     }
 
-    if (_maximumAmount != null &&
-        transaction.amount > _maximumAmount!) {
+    if (_maximumAmount != null && transaction.amount > _maximumAmount!) {
       return false;
     }
 
@@ -379,29 +354,24 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       onTap: () => setState(() => _selectedType = type),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected
               ? color
-              : theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
           borderRadius: BorderRadius.circular(13),
           border: Border.all(
             color: selected
                 ? color
-                : theme.colorScheme.outlineVariant
-                    .withValues(alpha: 0.3),
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            color: selected
-                ? Colors.white
-                : theme.colorScheme.onSurface,
+            color: selected ? Colors.white : theme.colorScheme.onSurface,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -423,24 +393,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       child: Material(
         color: active
             ? scheme.primary.withValues(alpha: 0.12)
-            : scheme.surfaceContainerHighest
-                .withValues(alpha: 0.25),
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(13),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(13),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 13,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
               border: Border.all(
                 color: active
                     ? scheme.primary.withValues(alpha: 0.35)
-                    : scheme.outlineVariant
-                        .withValues(alpha: 0.3),
+                    : scheme.outlineVariant.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -449,18 +414,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 Icon(
                   icon,
                   size: 17,
-                  color: active
-                      ? scheme.primary
-                      : scheme.onSurfaceVariant,
+                  color: active ? scheme.primary : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 7),
                 Text(
                   label,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: active
-                        ? scheme.primary
-                        : scheme.onSurface,
+                    color: active ? scheme.primary : scheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -479,10 +440,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget _buildTransactionCard(TransactionModel transaction) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final color = _getTransactionColor(
-      context,
-      transaction.type,
-    );
+    final color = _getTransactionColor(context, transaction.type);
 
     final isIncome = transaction.type == TransactionType.income;
     final isExpense = transaction.type == TransactionType.expense;
@@ -503,18 +461,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final prefix = isIncome
         ? '+'
         : isExpense
-            ? '-'
-            : '';
+        ? '-'
+        : '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 11),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest
-            .withValues(alpha: 0.32),
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.32),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.2)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -597,8 +552,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       tooltip: 'Delete transaction',
-                      onPressed: () =>
-                          _deleteTransaction(transaction),
+                      onPressed: () => _deleteTransaction(transaction),
                       icon: Icon(
                         Icons.delete_outline_rounded,
                         size: 19,
@@ -631,22 +585,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             children: [
               const Text(
                 'Filter by date',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 10),
-              _dateOption(
-                sheetContext,
-                'All Dates',
-                TransactionDateFilter.all,
-              ),
-              _dateOption(
-                sheetContext,
-                'Today',
-                TransactionDateFilter.today,
-              ),
+              _dateOption(sheetContext, 'All Dates', TransactionDateFilter.all),
+              _dateOption(sheetContext, 'Today', TransactionDateFilter.today),
               _dateOption(
                 sheetContext,
                 'This Week',
@@ -682,9 +625,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       leading: const Icon(Icons.calendar_today_rounded),
       title: Text(label),
       selected: _dateFilter == filter,
-      trailing: _dateFilter == filter
-          ? const Icon(Icons.check_rounded)
-          : null,
+      trailing: _dateFilter == filter ? const Icon(Icons.check_rounded) : null,
       onTap: () {
         Navigator.pop(sheetContext);
         setState(() {
@@ -741,8 +682,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               children: [
                 TextField(
                   controller: minimumController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
@@ -753,8 +693,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: maximumController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(
+                  keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
@@ -852,10 +791,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             children: [
               const Text(
                 'Filter by account',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 10),
               ListTile(
@@ -871,8 +807,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 },
               ),
               ...accounts.map((account) {
-                final selected =
-                    _selectedAccountId == account.id;
+                final selected = _selectedAccountId == account.id;
 
                 return ListTile(
                   leading: Icon(
@@ -885,9 +820,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       ? Text(account.bankName)
                       : null,
                   selected: selected,
-                  trailing: selected
-                      ? const Icon(Icons.check_rounded)
-                      : null,
+                  trailing: selected ? const Icon(Icons.check_rounded) : null,
                   onTap: () {
                     Navigator.pop(sheetContext);
                     setState(() {
@@ -919,10 +852,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             children: [
               const Text(
                 'Sort transactions',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 10),
               _sortOptionTile(
@@ -966,9 +896,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       leading: Icon(icon),
       title: Text(label),
       selected: _sortOption == option,
-      trailing: _sortOption == option
-          ? const Icon(Icons.check_rounded)
-          : null,
+      trailing: _sortOption == option ? const Icon(Icons.check_rounded) : null,
       onTap: () {
         Navigator.pop(sheetContext);
         setState(() => _sortOption = option);
@@ -999,9 +927,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   // DETAILS AND DELETE
   // ------------------------------------------------------------
 
-  Future<void> _openTransactionDetails(
-    TransactionModel transaction,
-  ) async {
+  Future<void> _openTransactionDetails(TransactionModel transaction) async {
     final changed = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => TransactionDetailsScreen(
@@ -1018,25 +944,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
-  Future<void> _deleteTransaction(
-    TransactionModel transaction,
-  ) async {
+  Future<void> _deleteTransaction(TransactionModel transaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Transaction?'),
-        content: const Text(
-          'This transaction will be permanently deleted.',
-        ),
+        content: const Text('This transaction will be permanently deleted.'),
         actions: [
           TextButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
           ),
         ],
@@ -1045,19 +965,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     if (!mounted || confirmed != true) return;
 
-    await widget.databaseService.deleteTransaction(
-      transaction.id,
-    );
+    await widget.databaseService.deleteTransaction(transaction.id);
 
     if (!mounted) return;
 
     setState(() {});
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Transaction deleted.'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Transaction deleted.')));
   }
 
   // ------------------------------------------------------------
@@ -1067,8 +983,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget _buildEmptyState() {
     final theme = Theme.of(context);
 
-    final hasFilters =
-        _hasActiveFilters || _searchQuery.isNotEmpty;
+    final hasFilters = _hasActiveFilters || _searchQuery.isNotEmpty;
 
     return Center(
       child: Padding(
@@ -1085,9 +1000,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              hasFilters
-                  ? 'No matching transactions'
-                  : 'No transactions yet',
+              hasFilters ? 'No matching transactions' : 'No transactions yet',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
@@ -1130,10 +1043,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       appBar: AppBar(
         title: const Text(
           'Transactions',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.4,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.4),
         ),
         actions: [
           IconButton(
@@ -1177,15 +1087,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               children: [
                 _buildTypeChip(label: 'All', type: null),
                 const SizedBox(width: 8),
-                _buildTypeChip(
-                  label: 'Income',
-                  type: TransactionType.income,
-                ),
+                _buildTypeChip(label: 'Income', type: TransactionType.income),
                 const SizedBox(width: 8),
-                _buildTypeChip(
-                  label: 'Expense',
-                  type: TransactionType.expense,
-                ),
+                _buildTypeChip(label: 'Expense', type: TransactionType.expense),
                 const SizedBox(width: 8),
                 _buildTypeChip(
                   label: 'Transfer',
@@ -1223,15 +1127,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 _buildFilterChip(
                   label: _amountFilterLabel,
                   icon: Icons.currency_rupee_rounded,
-                  active: _minimumAmount != null ||
-                      _maximumAmount != null,
+                  active: _minimumAmount != null || _maximumAmount != null,
                   onTap: _showAmountFilterDialog,
                 ),
                 _buildFilterChip(
                   label: _sortLabel,
                   icon: Icons.sort_rounded,
-                  active: _sortOption !=
-                      TransactionSortOption.newestFirst,
+                  active: _sortOption != TransactionSortOption.newestFirst,
                   onTap: _showSortSheet,
                 ),
               ],
@@ -1269,12 +1171,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ? _buildEmptyState()
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      5,
-                      16,
-                      28,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 5, 16, 28),
                     itemCount: transactions.length,
                     itemBuilder: (context, index) =>
                         _buildTransactionCard(transactions[index]),

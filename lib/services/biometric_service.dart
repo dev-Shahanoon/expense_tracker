@@ -23,8 +23,7 @@ class BiometricService {
       }
 
       return await _auth.authenticate(
-        localizedReason:
-            'Authenticate to open your Expense Tracker',
+        localizedReason: 'Authenticate to open your Expense Tracker',
         biometricOnly: true,
         persistAcrossBackgrounding: true,
       );

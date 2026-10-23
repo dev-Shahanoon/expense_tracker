@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 /// Shared visual foundation for the Expense Tracker.
@@ -25,19 +24,20 @@ class AppTheme {
   static const Color darkBorder = Color(0xFF303D39);
 
   static ThemeData get lightTheme {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: accent,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: accent,
-      onPrimary: Colors.white,
-      secondary: const Color(0xFF4C7770),
-      onSecondary: Colors.white,
-      surface: lightSurface,
-      onSurface: lightText,
-      error: const Color(0xFFB93838),
-      onError: Colors.white,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: accent,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: accent,
+          onPrimary: Colors.white,
+          secondary: const Color(0xFF4C7770),
+          onSecondary: Colors.white,
+          surface: lightSurface,
+          onSurface: lightText,
+          error: const Color(0xFFB93838),
+          onError: Colors.white,
+        );
 
     return _buildTheme(
       brightness: Brightness.light,
@@ -53,19 +53,20 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: accentDark,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: accentDark,
-      onPrimary: const Color(0xFF062C27),
-      secondary: const Color(0xFF9BCAC1),
-      onSecondary: const Color(0xFF15332E),
-      surface: darkSurface,
-      onSurface: darkText,
-      error: const Color(0xFFFF8585),
-      onError: const Color(0xFF3C1010),
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: accentDark,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: accentDark,
+          onPrimary: const Color(0xFF062C27),
+          secondary: const Color(0xFF9BCAC1),
+          onSecondary: const Color(0xFF15332E),
+          surface: darkSurface,
+          onSurface: darkText,
+          error: const Color(0xFFFF8585),
+          onError: const Color(0xFF3C1010),
+        );
 
     return _buildTheme(
       brightness: Brightness.dark,
@@ -229,10 +230,7 @@ class AppTheme {
           disabledForegroundColor: muted,
           elevation: 0,
           minimumSize: const Size(48, 50),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -244,10 +242,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: foreground,
           minimumSize: const Size(48, 48),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 13,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           side: BorderSide(color: border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -259,10 +254,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -275,9 +267,7 @@ class AppTheme {
         foregroundColor: scheme.onPrimary,
         elevation: 2,
         highlightElevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
 
       navigationBarTheme: NavigationBarThemeData(
@@ -296,10 +286,7 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return IconThemeData(
-            color: selected ? primary : muted,
-            size: 22,
-          );
+          return IconThemeData(color: selected ? primary : muted, size: 22);
         }),
       ),
 
@@ -320,18 +307,14 @@ class AppTheme {
         iconColor: muted,
         textColor: foreground,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
 
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         titleTextStyle: textTheme.titleLarge,
         contentTextStyle: textTheme.bodyMedium,
       ),
@@ -343,9 +326,7 @@ class AppTheme {
         showDragHandle: true,
         dragHandleColor: muted.withValues(alpha: 0.5),
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
 
@@ -353,15 +334,10 @@ class AppTheme {
         backgroundColor: isDark
             ? const Color(0xFF303A37)
             : const Color(0xFF243A35),
-        contentTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-        ),
+        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
         behavior: SnackBarBehavior.floating,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
 
       switchTheme: SwitchThemeData(
@@ -388,9 +364,7 @@ class AppTheme {
         }),
         checkColor: WidgetStatePropertyAll(scheme.onPrimary),
         side: BorderSide(color: muted),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
 
       radioTheme: RadioThemeData(
@@ -407,28 +381,16 @@ class AppTheme {
         linearTrackColor: primary.withValues(alpha: 0.14),
       ),
 
-      dividerTheme: DividerThemeData(
-        color: border,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
 
-      iconTheme: IconThemeData(
-        color: muted,
-        size: 22,
-      ),
+      iconTheme: IconThemeData(color: muted, size: 22),
 
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF303A37)
-              : const Color(0xFF243A35),
+          color: isDark ? const Color(0xFF303A37) : const Color(0xFF243A35),
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-        ),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 12),
       ),
 
       visualDensity: VisualDensity.standard,

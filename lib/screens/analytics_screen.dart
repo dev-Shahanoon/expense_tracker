@@ -9,10 +9,7 @@ import '../services/database_service.dart';
 class AnalyticsScreen extends StatefulWidget {
   final DatabaseService databaseService;
 
-  const AnalyticsScreen({
-    super.key,
-    required this.databaseService,
-  });
+  const AnalyticsScreen({super.key, required this.databaseService});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -41,23 +38,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   bool _showDistribution = false;
 
-  bool get _isDark =>
-      Theme.of(context).brightness == Brightness.dark;
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   Color get _pageBackground =>
       _isDark ? const Color(0xFF101817) : const Color(0xFFF4F8F7);
 
-  Color get _surfaceColor =>
-      _isDark ? const Color(0xFF1B2523) : Colors.white;
+  Color get _surfaceColor => _isDark ? const Color(0xFF1B2523) : Colors.white;
 
   Color get _borderColor =>
       _isDark ? const Color(0xFF33413E) : const Color(0xFFE0EBE8);
 
-  Color get _primaryText =>
-      _isDark ? const Color(0xFFF0F5F3) : navy;
+  Color get _primaryText => _isDark ? const Color(0xFFF0F5F3) : navy;
 
-  Color get _secondaryText =>
-      _isDark ? const Color(0xFFB0BFBB) : muted;
+  Color get _secondaryText => _isDark ? const Color(0xFFB0BFBB) : muted;
 
   Color get _progressBackground =>
       _isDark ? const Color(0xFF354440) : const Color(0xFFEAF2EF);
@@ -95,8 +88,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   void _previousMonth() {
     setState(() {
-      _selectedMonth =
-          DateTime(_selectedMonth.year, _selectedMonth.month - 1);
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     });
   }
 
@@ -104,44 +96,35 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     if (_isCurrentMonth) return;
 
     setState(() {
-      _selectedMonth =
-          DateTime(_selectedMonth.year, _selectedMonth.month + 1);
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
     });
   }
 
   bool get _isCurrentMonth {
     final now = DateTime.now();
-    return _selectedMonth.year == now.year &&
-        _selectedMonth.month == now.month;
+    return _selectedMonth.year == now.year && _selectedMonth.month == now.month;
   }
 
   List<TransactionModel> get _monthlyTransactions =>
       widget.databaseService.getTransactionsForMonth(_selectedMonth);
 
-  List<TransactionModel> get _expenseTransactions =>
-      _monthlyTransactions
-          .where((t) => t.type == TransactionType.expense)
-          .toList();
+  List<TransactionModel> get _expenseTransactions => _monthlyTransactions
+      .where((t) => t.type == TransactionType.expense)
+      .toList();
 
-  List<TransactionModel> get _incomeTransactions =>
-      _monthlyTransactions
-          .where((t) => t.type == TransactionType.income)
-          .toList();
+  List<TransactionModel> get _incomeTransactions => _monthlyTransactions
+      .where((t) => t.type == TransactionType.income)
+      .toList();
 
-  List<TransactionModel> get _transferTransactions =>
-      _monthlyTransactions
-          .where((t) => t.type == TransactionType.transfer)
-          .toList();
+  List<TransactionModel> get _transferTransactions => _monthlyTransactions
+      .where((t) => t.type == TransactionType.transfer)
+      .toList();
 
-  double get _income => _incomeTransactions.fold(
-        0.0,
-        (sum, t) => sum + t.amount,
-      );
+  double get _income =>
+      _incomeTransactions.fold(0.0, (sum, t) => sum + t.amount);
 
-  double get _expense => _expenseTransactions.fold(
-        0.0,
-        (sum, t) => sum + t.amount,
-      );
+  double get _expense =>
+      _expenseTransactions.fold(0.0, (sum, t) => sum + t.amount);
 
   double get _net => _income - _expense;
 
@@ -224,10 +207,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             const SizedBox(height: 6),
             Text(
               'Understand your money at a glance.',
-              style: TextStyle(
-                fontSize: 14,
-                color: _secondaryText,
-              ),
+              style: TextStyle(fontSize: 14, color: _secondaryText),
             ),
             const SizedBox(height: 24),
             _buildMonthSelector(),
@@ -277,9 +257,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             onPressed: _isCurrentMonth ? null : _nextMonth,
             icon: const Icon(Icons.chevron_right_rounded),
             color: _isCurrentMonth
-                ? (_isDark
-                    ? const Color(0xFF52615D)
-                    : const Color(0xFFD0DAD7))
+                ? (_isDark ? const Color(0xFF52615D) : const Color(0xFFD0DAD7))
                 : teal,
           ),
         ],
@@ -362,10 +340,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           const SizedBox(height: 25),
           const Text(
             'Net change',
-            style: TextStyle(
-              color: Color(0xFFF0EDED),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Color(0xFFF0EDED), fontSize: 13),
           ),
           const SizedBox(height: 7),
           FittedBox(
@@ -384,10 +359,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            height: 1,
-            color: Colors.white.withValues(alpha: 0.22),
-          ),
+          Container(height: 1, color: Colors.white.withValues(alpha: 0.22)),
           const SizedBox(height: 22),
           Row(
             children: [
@@ -422,18 +394,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               const Expanded(
                 child: Text(
                   'Tap card to view distribution',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 11),
                 ),
               ),
               Text(
                 '${_monthlyTransactions.length} records',
-                style: const TextStyle(
-                  color: Color(0xFFD1F8F2),
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Color(0xFFD1F8F2), fontSize: 11),
               ),
             ],
           ),
@@ -467,10 +433,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFFD1F8F2),
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Color(0xFFD1F8F2), fontSize: 12),
               ),
               const SizedBox(height: 6),
               FittedBox(
@@ -512,10 +475,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   ),
                 ),
               ),
-              _flipButton(
-                Icons.account_balance_wallet_rounded,
-                'Overview',
-              ),
+              _flipButton(Icons.account_balance_wallet_rounded, 'Overview'),
             ],
           ),
           const SizedBox(height: 12),
@@ -641,18 +601,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               const Expanded(
                 child: Text(
                   'Tap card to return to overview',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 11),
                 ),
               ),
               Text(
                 '${categories.length} categories',
-                style: const TextStyle(
-                  color: Color(0xFFD1F8F2),
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Color(0xFFD1F8F2), fontSize: 11),
               ),
             ],
           ),
@@ -667,9 +621,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.17),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -778,10 +730,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: _secondaryText,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: _secondaryText, fontSize: 11),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -826,10 +775,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           const SizedBox(height: 5),
           Text(
             'Where your money went this month',
-            style: TextStyle(
-              color: _secondaryText,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: _secondaryText, fontSize: 12),
           ),
           const SizedBox(height: 20),
           if (categories.isEmpty)
@@ -845,10 +791,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           else
             ...categories.asMap().entries.map((item) {
               final entry = item.value;
-              final percentage =
-                  _expense == 0 ? 0.0 : entry.value / _expense;
-              final color =
-                  _chartColors[item.key % _chartColors.length];
+              final percentage = _expense == 0 ? 0.0 : entry.value / _expense;
+              final color = _chartColors[item.key % _chartColors.length];
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 19),
@@ -898,8 +842,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         value: percentage.clamp(0.0, 1.0),
                         minHeight: 7,
                         backgroundColor: _progressBackground,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(color),
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -907,10 +850,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       alignment: Alignment.centerRight,
                       child: Text(
                         '${(percentage * 100).toStringAsFixed(1)}% of expenses',
-                        style: TextStyle(
-                          color: _secondaryText,
-                          fontSize: 10,
-                        ),
+                        style: TextStyle(color: _secondaryText, fontSize: 10),
                       ),
                     ),
                   ],
@@ -926,14 +866,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: _isDark
-            ? const Color(0xFF173B36)
-            : const Color(0xFFE1F7F2),
+        color: _isDark ? const Color(0xFF173B36) : const Color(0xFFE1F7F2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _isDark
-              ? const Color(0xFF28564E)
-              : const Color(0xFFC7EDE5),
+          color: _isDark ? const Color(0xFF28564E) : const Color(0xFFC7EDE5),
         ),
       ),
       child: Row(
@@ -964,10 +900,7 @@ class _DonutPainter extends CustomPainter {
   final List<double> values;
   final List<Color> colors;
 
-  _DonutPainter({
-    required this.values,
-    required this.colors,
-  });
+  _DonutPainter({required this.values, required this.colors});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -985,10 +918,7 @@ class _DonutPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final total = values.fold<double>(
-      0,
-      (sum, value) => sum + value,
-    );
+    final total = values.fold<double>(0, (sum, value) => sum + value);
 
     if (total <= 0) {
       paint.color = const Color(0xFFBDEDE5);
@@ -1004,13 +934,7 @@ class _DonutPainter extends CustomPainter {
       final sweepAngle = values[i] / total * math.pi * 2;
       paint.color = colors[i % colors.length];
 
-      canvas.drawArc(
-        rect,
-        startAngle,
-        sweepAngle,
-        false,
-        paint,
-      );
+      canvas.drawArc(rect, startAngle, sweepAngle, false, paint);
 
       startAngle += sweepAngle;
     }

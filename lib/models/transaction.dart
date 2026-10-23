@@ -1,9 +1,4 @@
-enum TransactionType {
-  income,
-  expense,
-  transfer,
-  cardPayment,
-}
+enum TransactionType { income, expense, transfer, cardPayment }
 
 class TransactionModel {
   final String id;
@@ -39,9 +34,7 @@ class TransactionModel {
     };
   }
 
-  factory TransactionModel.fromMap(
-    Map<String, dynamic> map,
-  ) {
+  factory TransactionModel.fromMap(Map<String, dynamic> map) {
     final savedType = map['type'] as String;
 
     return TransactionModel(

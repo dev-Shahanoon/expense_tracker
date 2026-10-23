@@ -17,12 +17,10 @@ class AccountDashboardScreen extends StatefulWidget {
   });
 
   @override
-  State<AccountDashboardScreen> createState() =>
-      _AccountDashboardScreenState();
+  State<AccountDashboardScreen> createState() => _AccountDashboardScreenState();
 }
 
-class _AccountDashboardScreenState
-    extends State<AccountDashboardScreen> {
+class _AccountDashboardScreenState extends State<AccountDashboardScreen> {
   String _formatAmount(double amount) {
     return '₹${amount.toStringAsFixed(2)}';
   }
@@ -59,14 +57,11 @@ class _AccountDashboardScreenState
   }
 
   List<TransactionModel> get _transactions {
-    final transactions =
-        widget.databaseService.getAccountTransactions(
+    final transactions = widget.databaseService.getAccountTransactions(
       widget.accountId,
     );
 
-    transactions.sort(
-      (a, b) => b.date.compareTo(a.date),
-    );
+    transactions.sort((a, b) => b.date.compareTo(a.date));
 
     return transactions;
   }
@@ -138,13 +133,10 @@ class _AccountDashboardScreenState
   }
 
   String _accountName(String id) {
-    return widget.databaseService.getAccount(id)?.name ??
-        'Unknown account';
+    return widget.databaseService.getAccount(id)?.name ?? 'Unknown account';
   }
 
-  String _transactionTitle(
-    TransactionModel transaction,
-  ) {
+  String _transactionTitle(TransactionModel transaction) {
     if (transaction.type == TransactionType.transfer) {
       if (transaction.accountId == widget.accountId) {
         return 'Transfer Out';
@@ -156,9 +148,7 @@ class _AccountDashboardScreenState
     return _categoryName(transaction);
   }
 
-  String _transactionSubtitle(
-    TransactionModel transaction,
-  ) {
+  String _transactionSubtitle(TransactionModel transaction) {
     if (transaction.type == TransactionType.transfer) {
       if (transaction.accountId == widget.accountId) {
         return 'To ${_accountName(transaction.toAccountId ?? '')}';
@@ -171,15 +161,10 @@ class _AccountDashboardScreenState
       return transaction.note;
     }
 
-    return transaction.type == TransactionType.income
-        ? 'Income'
-        : 'Expense';
+    return transaction.type == TransactionType.income ? 'Income' : 'Expense';
   }
 
-  Color _amountColor(
-    BuildContext context,
-    TransactionModel transaction,
-  ) {
+  Color _amountColor(BuildContext context, TransactionModel transaction) {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (transaction.type == TransactionType.income) {
@@ -213,17 +198,13 @@ class _AccountDashboardScreenState
     return '+';
   }
 
-  Future<void> _deleteTransaction(
-    TransactionModel transaction,
-  ) async {
+  Future<void> _deleteTransaction(TransactionModel transaction) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Delete Transaction?'),
-          content: const Text(
-            'This transaction will be permanently deleted.',
-          ),
+          content: const Text('This transaction will be permanently deleted.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -233,8 +214,7 @@ class _AccountDashboardScreenState
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor:
-                    Theme.of(dialogContext).colorScheme.error,
+                backgroundColor: Theme.of(dialogContext).colorScheme.error,
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop(true);
@@ -250,9 +230,7 @@ class _AccountDashboardScreenState
       return;
     }
 
-    await widget.databaseService.deleteTransaction(
-      transaction.id,
-    );
+    await widget.databaseService.deleteTransaction(transaction.id);
 
     if (!mounted) {
       return;
@@ -260,17 +238,12 @@ class _AccountDashboardScreenState
 
     setState(() {});
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Transaction deleted'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Transaction deleted')));
   }
 
-  Widget _buildAccountHeader(
-    BuildContext context,
-    Account account,
-  ) {
+  Widget _buildAccountHeader(BuildContext context, Account account) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -278,8 +251,7 @@ class _AccountDashboardScreenState
         ? const Color(0xFF151C2B)
         : const Color(0xFF172554);
 
-    final balance =
-        widget.databaseService.getAccountBalance(account.id);
+    final balance = widget.databaseService.getAccountBalance(account.id);
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -288,9 +260,7 @@ class _AccountDashboardScreenState
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.2 : 0.12,
-            ),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.12),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -317,15 +287,13 @@ class _AccountDashboardScreenState
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       account.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          theme.textTheme.titleLarge?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.3,
@@ -336,11 +304,8 @@ class _AccountDashboardScreenState
                       account.bankName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: 0.55,
-                        ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.55),
                       ),
                     ),
                   ],
@@ -370,11 +335,7 @@ class _AccountDashboardScreenState
           const SizedBox(height: 22),
           Row(
             children: [
-              _buildHeaderInfo(
-                context,
-                label: 'Type',
-                value: account.type,
-              ),
+              _buildHeaderInfo(context, label: 'Type', value: account.type),
               if (account.lastFourDigits != null) ...[
                 const SizedBox(width: 30),
                 _buildHeaderInfo(
@@ -447,24 +408,17 @@ class _AccountDashboardScreenState
                 color: color.withValues(alpha: 0.09),
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(
-                icon,
-                size: 19,
-                color: color,
-              ),
+              child: Icon(icon, size: 19, color: color),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface.withValues(
-                        alpha: 0.5,
-                      ),
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -472,8 +426,7 @@ class _AccountDashboardScreenState
                     _formatAmount(amount),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -547,9 +500,7 @@ class _AccountDashboardScreenState
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [
@@ -560,24 +511,17 @@ class _AccountDashboardScreenState
               color: color.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
+            child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(width: 9),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface.withValues(
-                      alpha: 0.5,
-                    ),
+                    color: colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -604,13 +548,9 @@ class _AccountDashboardScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final color = _amountColor(
-      context,
-      transaction,
-    );
+    final color = _amountColor(context, transaction);
 
-    final isTransfer =
-        transaction.type == TransactionType.transfer;
+    final isTransfer = transaction.type == TransactionType.transfer;
 
     return Material(
       color: colorScheme.surface,
@@ -640,8 +580,7 @@ class _AccountDashboardScreenState
                 child: Center(
                   child: isTransfer
                       ? Icon(
-                          transaction.accountId ==
-                                  widget.accountId
+                          transaction.accountId == widget.accountId
                               ? Icons.north_east_rounded
                               : Icons.south_west_rounded,
                           color: color,
@@ -649,24 +588,20 @@ class _AccountDashboardScreenState
                         )
                       : Text(
                           _categoryIcon(transaction),
-                          style: const TextStyle(
-                            fontSize: 18,
-                          ),
+                          style: const TextStyle(fontSize: 18),
                         ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _transactionTitle(transaction),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          theme.textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -675,22 +610,16 @@ class _AccountDashboardScreenState
                       _transactionSubtitle(transaction),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(
-                          alpha: 0.5,
-                        ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       '${_formatDate(transaction.date)} • '
                       '${_formatTime(transaction.date)}',
-                      style:
-                          theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface.withValues(
-                          alpha: 0.35,
-                        ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.35),
                       ),
                     ),
                   ],
@@ -698,14 +627,12 @@ class _AccountDashboardScreenState
               ),
               const SizedBox(width: 8),
               Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '${_amountPrefix(transaction)}'
                     '${_formatAmount(transaction.amount)}',
-                    style:
-                        theme.textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: color,
                       fontWeight: FontWeight.w900,
                     ),
@@ -756,16 +683,11 @@ class _AccountDashboardScreenState
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 40,
-        horizontal: 24,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
@@ -813,53 +735,35 @@ class _AccountDashboardScreenState
         appBar: AppBar(
           title: const Text(
             'Account',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
         body: Center(
-          child: Text(
-            'Account not found.',
-            style: theme.textTheme.titleMedium,
-          ),
+          child: Text('Account not found.', style: theme.textTheme.titleMedium),
         ),
       );
     }
 
     final transactions = _transactions;
 
-    final income =
-        widget.databaseService.getAccountIncome(account.id);
+    final income = widget.databaseService.getAccountIncome(account.id);
 
-    final expense =
-        widget.databaseService.getAccountExpense(account.id);
+    final expense = widget.databaseService.getAccountExpense(account.id);
 
-    final balance =
-        widget.databaseService.getAccountBalance(account.id);
+    final balance = widget.databaseService.getAccountBalance(account.id);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           account.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            32,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            _buildAccountHeader(
-              context,
-              account,
-            ),
+            _buildAccountHeader(context, account),
 
             const SizedBox(height: 20),
 
@@ -891,9 +795,7 @@ class _AccountDashboardScreenState
                 color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: colorScheme.outline.withValues(
-                    alpha: 0.08,
-                  ),
+                  color: colorScheme.outline.withValues(alpha: 0.08),
                 ),
               ),
               child: Row(
@@ -902,9 +804,7 @@ class _AccountDashboardScreenState
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(
-                        alpha: 0.09,
-                      ),
+                      color: colorScheme.primary.withValues(alpha: 0.09),
                       borderRadius: BorderRadius.circular(11),
                     ),
                     child: Icon(
@@ -916,23 +816,18 @@ class _AccountDashboardScreenState
                   const SizedBox(width: 11),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Current Balance',
-                          style:
-                              theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurface.withValues(
-                              alpha: 0.5,
-                            ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           _formatAmount(balance),
-                          style:
-                              theme.textTheme.bodyMedium?.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -945,10 +840,7 @@ class _AccountDashboardScreenState
 
             const SizedBox(height: 10),
 
-            _buildTransferSummary(
-              context,
-              transactions,
-            ),
+            _buildTransferSummary(context, transactions),
 
             const SizedBox(height: 27),
 
@@ -957,8 +849,7 @@ class _AccountDashboardScreenState
                 Expanded(
                   child: Text(
                     'Transactions',
-                    style:
-                        theme.textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.2,
                     ),
@@ -970,14 +861,14 @@ class _AccountDashboardScreenState
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.55),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.55,
+                    ),
                     borderRadius: BorderRadius.circular(9),
                   ),
                   child: Text(
                     '${transactions.length}',
-                    style:
-                        theme.textTheme.labelSmall?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -992,13 +883,8 @@ class _AccountDashboardScreenState
             else
               ...transactions.map(
                 (transaction) => Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 9,
-                  ),
-                  child: _buildTransactionCard(
-                    context,
-                    transaction,
-                  ),
+                  padding: const EdgeInsets.only(bottom: 9),
+                  child: _buildTransactionCard(context, transaction),
                 ),
               ),
           ],

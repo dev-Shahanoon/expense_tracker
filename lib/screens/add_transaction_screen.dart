@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../data/categories.dart';
@@ -11,14 +10,10 @@ import '../services/database_service.dart';
 class AddTransactionScreen extends StatefulWidget {
   final DatabaseService databaseService;
 
-  const AddTransactionScreen({
-    super.key,
-    required this.databaseService,
-  });
+  const AddTransactionScreen({super.key, required this.databaseService});
 
   @override
-  State<AddTransactionScreen> createState() =>
-      _AddTransactionScreenState();
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
@@ -215,9 +210,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         return;
       }
 
-      final destination = _accounts.where(
-        (a) => a.id == _selectedToAccountId,
-      );
+      final destination = _accounts.where((a) => a.id == _selectedToAccountId);
 
       if (destination.isEmpty) {
         _showMessage('Please select a valid destination account.');
@@ -230,14 +223,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       if (_isCardPayment) {
-        final source = _accounts.firstWhere(
-          (a) => a.id == _selectedAccountId,
-        );
+        final source = _accounts.firstWhere((a) => a.id == _selectedAccountId);
 
         if (_isCreditCard(source)) {
-          _showMessage(
-            'Choose a bank or cash account to pay the credit card.',
-          );
+          _showMessage('Choose a bank or cash account to pay the credit card.');
           return;
         }
       }
@@ -245,9 +234,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     if (!_isTransfer && !_isCardPayment) {
       if (_selectedCategoryId == null ||
-          !_currentCategories.any(
-            (c) => c.id == _selectedCategoryId,
-          )) {
+          !_currentCategories.any((c) => c.id == _selectedCategoryId)) {
         _showMessage('Please select a category.');
         return;
       }
@@ -263,8 +250,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         categoryId: _isTransfer
             ? 'transfer'
             : _isCardPayment
-                ? 'card_payment'
-                : _selectedCategoryId!,
+            ? 'card_payment'
+            : _selectedCategoryId!,
         accountId: _selectedAccountId!,
         toAccountId: _needsDestination ? _selectedToAccountId : null,
         note: _noteController.text.trim(),
@@ -372,8 +359,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 10.5,
-                          fontWeight:
-                              selected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           color: selected
                               ? colors.onSurface
                               : colors.onSurfaceVariant,
@@ -409,10 +397,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           Text(
             'AMOUNT',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  letterSpacing: 1.3,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: colors.onSurfaceVariant,
+              letterSpacing: 1.3,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -430,8 +418,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               Expanded(
                 child: TextFormField(
                   controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
@@ -527,8 +516,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }).toList(),
       onChanged: onChanged,
       validator: (selected) {
-        if (selected == null ||
-            !accounts.any((a) => a.id == selected)) {
+        if (selected == null || !accounts.any((a) => a.id == selected)) {
           return 'Please select an account';
         }
         return null;
@@ -605,8 +593,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   Text(
                     'Tap to browse categories',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -652,9 +640,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: OutlinedButton.icon(
             onPressed: _pickTime,
             icon: const Icon(Icons.access_time_rounded),
-            label: Text(
-              TimeOfDay.fromDateTime(_selectedDate).format(context),
-            ),
+            label: Text(TimeOfDay.fromDateTime(_selectedDate).format(context)),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 15),
               foregroundColor: colors.onSurface,
@@ -674,9 +660,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -695,10 +681,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final destinationAccounts = _destinationAccounts;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Transaction'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Add Transaction'), centerTitle: false),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -719,13 +702,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   setState(() {
                     _selectedAccountId = value;
 
-                    if (_needsDestination &&
-                        _selectedToAccountId == value) {
+                    if (_needsDestination && _selectedToAccountId == value) {
                       final alternatives = destinationAccounts
                           .where((a) => a.id != value)
                           .toList();
-                      _selectedToAccountId =
-                          alternatives.isEmpty ? null : alternatives.first.id;
+                      _selectedToAccountId = alternatives.isEmpty
+                          ? null
+                          : alternatives.first.id;
                     }
                   });
                 },
@@ -733,9 +716,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               if (_needsDestination) ...[
                 const SizedBox(height: 16),
                 _buildAccountDropdown(
-                  label: _isCardPayment
-                      ? 'Credit card to pay'
-                      : 'Transfer to',
+                  label: _isCardPayment ? 'Credit card to pay' : 'Transfer to',
                   value: _selectedToAccountId,
                   accounts: destinationAccounts
                       .where((a) => a.id != _selectedAccountId)
@@ -754,8 +735,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   'Choose the bank or cash account paying the bill and the '
                   'credit card receiving the payment.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
+                    color: colors.onSurfaceVariant,
+                  ),
                 ),
               ],
               if (!_isTransfer && !_isCardPayment) ...[
@@ -776,8 +757,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   hintText: 'What was this transaction for?',
                   prefixIcon: const Icon(Icons.notes_rounded),
                   filled: true,
-                  fillColor:
-                      colors.surfaceContainerHighest.withValues(alpha: 0.3),
+                  fillColor: colors.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(color: colors.outlineVariant),
@@ -853,9 +835,7 @@ class _CategoryPickerSheet extends StatelessWidget {
       height: MediaQuery.of(context).size.height * 0.72,
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(26),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       ),
       child: Column(
         children: [
@@ -905,8 +885,7 @@ class _CategoryPickerSheet extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: categories.length,
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
@@ -919,8 +898,7 @@ class _CategoryPickerSheet extends StatelessWidget {
                 return Material(
                   color: selected
                       ? accentColor.withValues(alpha: 0.10)
-                      : colors.surfaceContainerHighest
-                          .withValues(alpha: 0.38),
+                      : colors.surfaceContainerHighest.withValues(alpha: 0.38),
                   borderRadius: BorderRadius.circular(17),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(17),
@@ -931,8 +909,7 @@ class _CategoryPickerSheet extends StatelessWidget {
                         border: Border.all(
                           color: selected
                               ? accentColor
-                              : colors.outlineVariant
-                                  .withValues(alpha: 0.5),
+                              : colors.outlineVariant.withValues(alpha: 0.5),
                           width: selected ? 1.5 : 0.8,
                         ),
                       ),

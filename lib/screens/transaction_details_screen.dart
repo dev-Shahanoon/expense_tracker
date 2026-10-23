@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../data/categories.dart';
@@ -17,8 +16,7 @@ class TransactionDetailsScreen extends StatelessWidget {
     required this.transaction,
   });
 
-  String _formatAmount(double amount) =>
-      '₹${amount.toStringAsFixed(2)}';
+  String _formatAmount(double amount) => '₹${amount.toStringAsFixed(2)}';
 
   String _formatDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/'
@@ -29,8 +27,8 @@ class TransactionDetailsScreen extends StatelessWidget {
     final hour = date.hour == 0
         ? 12
         : date.hour > 12
-            ? date.hour - 12
-            : date.hour;
+        ? date.hour - 12
+        : date.hour;
     final minute = date.minute.toString().padLeft(2, '0');
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
@@ -170,8 +168,7 @@ class TransactionDetailsScreen extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant
-              .withValues(alpha: 0.45),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
         ),
       ),
       child: Row(
@@ -180,14 +177,10 @@ class TransactionDetailsScreen extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary
-                  .withValues(alpha: 0.10),
+              color: theme.colorScheme.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(13),
             ),
-            child: Icon(
-              icon,
-              color: theme.colorScheme.primary,
-            ),
+            child: Icon(icon, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -220,10 +213,8 @@ class TransactionDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _transactionColor();
-    final isTransfer =
-        transaction.type == TransactionType.transfer;
-    final isCardPayment =
-        transaction.type == TransactionType.cardPayment;
+    final isTransfer = transaction.type == TransactionType.transfer;
+    final isCardPayment = transaction.type == TransactionType.cardPayment;
     final hasDestination = isTransfer || isCardPayment;
 
     return Scaffold(
@@ -250,28 +241,19 @@ class TransactionDetailsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: color.withValues(alpha: 0.25),
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.25)),
             ),
             child: Column(
               children: [
                 CircleAvatar(
                   radius: 32,
                   backgroundColor: color.withValues(alpha: 0.12),
-                  child: Icon(
-                    _transactionIcon(),
-                    color: color,
-                    size: 30,
-                  ),
+                  child: Icon(_transactionIcon(), color: color, size: 30),
                 ),
                 const SizedBox(height: 14),
                 Text(
                   _transactionType(),
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 10),
                 FittedBox(
@@ -289,9 +271,7 @@ class TransactionDetailsScreen extends StatelessWidget {
                   '${_formatDate(transaction.date)} • '
                   '${_formatTime(transaction.date)}',
                   style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -300,10 +280,7 @@ class TransactionDetailsScreen extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             'Details',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           _detailTile(
@@ -381,12 +358,10 @@ class _EditTransactionSheet extends StatefulWidget {
   });
 
   @override
-  State<_EditTransactionSheet> createState() =>
-      _EditTransactionSheetState();
+  State<_EditTransactionSheet> createState() => _EditTransactionSheetState();
 }
 
-class _EditTransactionSheetState
-    extends State<_EditTransactionSheet> {
+class _EditTransactionSheetState extends State<_EditTransactionSheet> {
   late TransactionType _type;
   late String _accountId;
   String? _toAccountId;
@@ -396,12 +371,10 @@ class _EditTransactionSheetState
   late TextEditingController _amountController;
   late TextEditingController _noteController;
 
-  List<Account> get _accounts =>
-      widget.databaseService.accounts;
+  List<Account> get _accounts => widget.databaseService.accounts;
 
   bool get _needsDestination =>
-      _type == TransactionType.transfer ||
-      _type == TransactionType.cardPayment;
+      _type == TransactionType.transfer || _type == TransactionType.cardPayment;
 
   List<Account> get _sourceAccounts {
     if (_type == TransactionType.cardPayment) {
@@ -436,9 +409,7 @@ class _EditTransactionSheetState
     _amountController = TextEditingController(
       text: widget.transaction.amount.toStringAsFixed(2),
     );
-    _noteController = TextEditingController(
-      text: widget.transaction.note,
-    );
+    _noteController = TextEditingController(text: widget.transaction.note);
 
     if (_type == TransactionType.transfer ||
         _type == TransactionType.cardPayment) {
@@ -474,8 +445,7 @@ class _EditTransactionSheetState
         _accountId = _sourceAccounts.first.id;
       }
 
-      if (type == TransactionType.income &&
-          incomeSources.isNotEmpty) {
+      if (type == TransactionType.income && incomeSources.isNotEmpty) {
         _categoryId = incomeSources.first.id;
       } else if (type == TransactionType.expense &&
           expenseCategories.isNotEmpty) {
@@ -530,9 +500,9 @@ class _EditTransactionSheetState
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _save() {
@@ -564,16 +534,14 @@ class _EditTransactionSheetState
         return;
       }
 
-      final destination =
-          widget.databaseService.getAccount(_toAccountId!);
+      final destination = widget.databaseService.getAccount(_toAccountId!);
 
       if (destination == null) {
         _showError('The destination account could not be found.');
         return;
       }
 
-      if (_type == TransactionType.cardPayment &&
-          !destination.isCreditCard) {
+      if (_type == TransactionType.cardPayment && !destination.isCreditCard) {
         _showError('Select a credit card as the destination.');
         return;
       }
@@ -589,8 +557,8 @@ class _EditTransactionSheetState
       categoryId: _type == TransactionType.transfer
           ? 'transfer'
           : _type == TransactionType.cardPayment
-              ? 'card_payment'
-              : _categoryId!,
+          ? 'card_payment'
+          : _categoryId!,
       accountId: _accountId,
       toAccountId: _needsDestination ? _toAccountId : null,
       date: _date,
@@ -636,10 +604,7 @@ class _EditTransactionSheetState
             const SizedBox(height: 20),
             const Text(
               'Edit Transaction',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -671,8 +636,9 @@ class _EditTransactionSheetState
             const SizedBox(height: 18),
             TextField(
               controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Amount',
                 prefixText: '₹ ',
@@ -717,9 +683,8 @@ class _EditTransactionSheetState
             if (_needsDestination) ...[
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
-                initialValue: _destinationAccounts.any(
-                  (a) => a.id == _toAccountId,
-                )
+                initialValue:
+                    _destinationAccounts.any((a) => a.id == _toAccountId)
                     ? _toAccountId
                     : null,
                 isExpanded: true,

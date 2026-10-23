@@ -1,4 +1,3 @@
-
 import '../models/category.dart';
 
 const List<ExpenseCategory> expenseCategories = [
@@ -7,7 +6,11 @@ const List<ExpenseCategory> expenseCategories = [
   ExpenseCategory(id: 'coffee', name: 'Coffee & Snacks', icon: '☕'),
   ExpenseCategory(id: 'transport', name: 'Transport', icon: '🚗'),
   ExpenseCategory(id: 'fuel', name: 'Fuel', icon: '⛽'),
-  ExpenseCategory(id: 'vehicle_maintenance', name: 'Vehicle Maintenance', icon: '🔧'),
+  ExpenseCategory(
+    id: 'vehicle_maintenance',
+    name: 'Vehicle Maintenance',
+    icon: '🔧',
+  ),
   ExpenseCategory(id: 'shopping', name: 'Shopping', icon: '🛍️'),
   ExpenseCategory(id: 'clothing', name: 'Clothing', icon: '👕'),
   ExpenseCategory(id: 'personal_care', name: 'Personal Care', icon: '🧴'),
