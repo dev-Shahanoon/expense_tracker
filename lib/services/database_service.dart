@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -34,14 +33,11 @@ class DatabaseService extends ChangeNotifier {
   bool _initialized = false;
 
   List<Account> get accounts => List.unmodifiable(_accounts);
-  List<TransactionModel> get transactions =>
-      List.unmodifiable(_transactions);
+  List<TransactionModel> get transactions => List.unmodifiable(_transactions);
   List<Loan> get loans => List.unmodifiable(_loans);
-  List<EmiPayment> get emiPayments =>
-      List.unmodifiable(_emiPayments);
+  List<EmiPayment> get emiPayments => List.unmodifiable(_emiPayments);
   List<MoneyLent> get moneyLent => List.unmodifiable(_moneyLent);
-  List<LentRepayment> get lentRepayments =>
-      List.unmodifiable(_lentRepayments);
+  List<LentRepayment> get lentRepayments => List.unmodifiable(_lentRepayments);
 
   Future<void> init() async {
     if (_initialized) return;
@@ -59,8 +55,7 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _accountsBox.values.map(
-          (value) =>
-              Account.fromMap(Map<String, dynamic>.from(value as Map)),
+          (value) => Account.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -68,9 +63,8 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _transactionsBox.values.map(
-          (value) => TransactionModel.fromMap(
-            Map<String, dynamic>.from(value as Map),
-          ),
+          (value) =>
+              TransactionModel.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -78,8 +72,7 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _loansBox.values.map(
-          (value) =>
-              Loan.fromMap(Map<String, dynamic>.from(value as Map)),
+          (value) => Loan.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -87,9 +80,8 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _emiPaymentsBox.values.map(
-          (value) => EmiPayment.fromMap(
-            Map<String, dynamic>.from(value as Map),
-          ),
+          (value) =>
+              EmiPayment.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -97,8 +89,7 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _moneyLentBox.values.map(
-          (value) =>
-              MoneyLent.fromMap(Map<String, dynamic>.from(value as Map)),
+          (value) => MoneyLent.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -106,9 +97,8 @@ class DatabaseService extends ChangeNotifier {
       ..clear()
       ..addAll(
         _lentRepaymentsBox.values.map(
-          (value) => LentRepayment.fromMap(
-            Map<String, dynamic>.from(value as Map),
-          ),
+          (value) =>
+              LentRepayment.fromMap(Map<String, dynamic>.from(value as Map)),
         ),
       );
 
@@ -156,8 +146,7 @@ class DatabaseService extends ChangeNotifier {
 
     await _accountsBox.put(account.id, account.toMap());
 
-    final index =
-        _accounts.indexWhere((item) => item.id == account.id);
+    final index = _accounts.indexWhere((item) => item.id == account.id);
     _accounts[index] = account;
     notifyListeners();
   }
@@ -167,8 +156,7 @@ class DatabaseService extends ChangeNotifier {
 
     if (_transactions.any(
       (transaction) =>
-          transaction.accountId == id ||
-          transaction.toAccountId == id,
+          transaction.accountId == id || transaction.toAccountId == id,
     )) {
       throw StateError('Cannot delete an account with transactions.');
     }
@@ -179,9 +167,7 @@ class DatabaseService extends ChangeNotifier {
 
     if (_moneyLent.any((item) => item.accountId == id) ||
         _lentRepayments.any((item) => item.accountId == id)) {
-      throw StateError(
-        'Cannot delete an account linked to a lending record.',
-      );
+      throw StateError('Cannot delete an account linked to a lending record.');
     }
 
     await _accountsBox.delete(id);
@@ -216,10 +202,7 @@ class DatabaseService extends ChangeNotifier {
       throw StateError('The destination account does not exist.');
     }
 
-    await _transactionsBox.put(
-      transaction.id,
-      transaction.toMap(),
-    );
+    await _transactionsBox.put(transaction.id, transaction.toMap());
     _transactions.add(transaction);
     notifyListeners();
   }
@@ -231,13 +214,9 @@ class DatabaseService extends ChangeNotifier {
       throw StateError('Transaction not found.');
     }
 
-    await _transactionsBox.put(
-      transaction.id,
-      transaction.toMap(),
-    );
+    await _transactionsBox.put(transaction.id, transaction.toMap());
 
-    final index =
-        _transactions.indexWhere((item) => item.id == transaction.id);
+    final index = _transactions.indexWhere((item) => item.id == transaction.id);
     _transactions[index] = transaction;
     notifyListeners();
   }
@@ -362,23 +341,18 @@ class DatabaseService extends ChangeNotifier {
   double get totalBalance {
     return _accounts
         .where((account) => !account.isCreditCard)
-        .fold(
-          0.0,
-          (sum, account) => sum + getAccountBalance(account.id),
-        );
+        .fold(0.0, (sum, account) => sum + getAccountBalance(account.id));
   }
 
   double get totalIncome {
     return _transactions
-        .where((transaction) =>
-            transaction.type == TransactionType.income)
+        .where((transaction) => transaction.type == TransactionType.income)
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
   double get totalExpense {
     return _transactions
-        .where((transaction) =>
-            transaction.type == TransactionType.expense)
+        .where((transaction) => transaction.type == TransactionType.expense)
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
@@ -387,18 +361,14 @@ class DatabaseService extends ChangeNotifier {
         .where((account) => account.isCreditCard)
         .fold(
           0.0,
-          (sum, account) =>
-              sum + getCreditCardOutstanding(account.id),
+          (sum, account) => sum + getCreditCardOutstanding(account.id),
         );
   }
 
   double get totalAvailableCredit {
     return _accounts
         .where((account) => account.isCreditCard)
-        .fold(
-          0.0,
-          (sum, account) => sum + getAvailableCredit(account.id),
-        );
+        .fold(0.0, (sum, account) => sum + getAvailableCredit(account.id));
   }
 
   double get netBalanceAfterCreditCardDebt =>
@@ -428,15 +398,13 @@ class DatabaseService extends ChangeNotifier {
 
   double getMonthlyIncome(int year, int month) {
     return getTransactionsForMonth(DateTime(year, month))
-        .where((transaction) =>
-            transaction.type == TransactionType.income)
+        .where((transaction) => transaction.type == TransactionType.income)
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
   double getMonthlyExpense(int year, int month) {
     return getTransactionsForMonth(DateTime(year, month))
-        .where((transaction) =>
-            transaction.type == TransactionType.expense)
+        .where((transaction) => transaction.type == TransactionType.expense)
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
   }
 
@@ -510,8 +478,7 @@ class DatabaseService extends ChangeNotifier {
 
     // Preserve loans that have actual payment history.
     if (schedule.any(
-      (payment) =>
-          payment.paidAmount > 0 || payment.transactionId != null,
+      (payment) => payment.paidAmount > 0 || payment.transactionId != null,
     )) {
       throw StateError(
         'This loan has recorded EMI payments. '
@@ -533,13 +500,8 @@ class DatabaseService extends ChangeNotifier {
   }
 
   List<EmiPayment> getLoanEmiPayments(String loanId) {
-    return _emiPayments
-        .where((payment) => payment.loanId == loanId)
-        .toList()
-      ..sort(
-        (a, b) =>
-            a.installmentNumber.compareTo(b.installmentNumber),
-      );
+    return _emiPayments.where((payment) => payment.loanId == loanId).toList()
+      ..sort((a, b) => a.installmentNumber.compareTo(b.installmentNumber));
   }
 
   Future<void> recordEmiPayment({
@@ -569,9 +531,7 @@ class DatabaseService extends ChangeNotifier {
     }
 
     if (amount > emi.remainingAmount + 0.005) {
-      throw StateError(
-        'Payment exceeds the remaining EMI amount.',
-      );
+      throw StateError('Payment exceeds the remaining EMI amount.');
     }
 
     if (getAccount(loan.accountId) == null) {
@@ -587,8 +547,7 @@ class DatabaseService extends ChangeNotifier {
       amount: amount,
       categoryId: 'loan_emi',
       accountId: loan.accountId,
-      note:
-          'EMI payment: ${loan.name} - Installment ${emi.installmentNumber}',
+      note: 'EMI payment: ${loan.name} - Installment ${emi.installmentNumber}',
       date: paymentDate,
     );
 
@@ -605,27 +564,20 @@ class DatabaseService extends ChangeNotifier {
       principalComponent: emi.principalComponent,
       interestComponent: emi.interestComponent,
       paidAmount: updatedPaidAmount,
-      paidDate: updatedPaidAmount >= emi.amount - 0.005
-          ? paymentDate
-          : null,
+      paidDate: updatedPaidAmount >= emi.amount - 0.005 ? paymentDate : null,
       transactionId: transactionId,
     );
 
     await addTransaction(transaction);
 
     try {
-      await _emiPaymentsBox.put(
-        updatedEmi.id,
-        updatedEmi.toMap(),
-      );
+      await _emiPaymentsBox.put(updatedEmi.id, updatedEmi.toMap());
 
       _emiPayments[index] = updatedEmi;
       notifyListeners();
     } catch (_) {
       await _transactionsBox.delete(transactionId);
-      _transactions.removeWhere(
-        (item) => item.id == transactionId,
-      );
+      _transactions.removeWhere((item) => item.id == transactionId);
       notifyListeners();
       rethrow;
     }
@@ -639,15 +591,11 @@ class DatabaseService extends ChangeNotifier {
     }
 
     if (getLoan(loan.id) == null) {
-      throw StateError(
-        'Save the loan before creating its EMI schedule.',
-      );
+      throw StateError('Save the loan before creating its EMI schedule.');
     }
 
     if (getLoanEmiPayments(loan.id).isNotEmpty) {
-      throw StateError(
-        'An EMI schedule already exists for this loan.',
-      );
+      throw StateError('An EMI schedule already exists for this loan.');
     }
 
     final monthlyRate = loan.annualInterestRate / 1200;
@@ -660,8 +608,7 @@ class DatabaseService extends ChangeNotifier {
       final interest = remainingPrincipal * monthlyRate;
       var principalComponent = emi - interest;
 
-      if (i == loan.tenureMonths ||
-          principalComponent > remainingPrincipal) {
+      if (i == loan.tenureMonths || principalComponent > remainingPrincipal) {
         principalComponent = remainingPrincipal;
       }
 
@@ -673,11 +620,7 @@ class DatabaseService extends ChangeNotifier {
 
       final dueDate = i == 1
           ? loan.firstEmiDate
-          : _dateForEmiMonth(
-              loan.firstEmiDate,
-              i - 1,
-              loan.emiDay,
-            );
+          : _dateForEmiMonth(loan.firstEmiDate, i - 1, loan.emiDay);
 
       installments.add(
         EmiPayment(
@@ -703,15 +646,10 @@ class DatabaseService extends ChangeNotifier {
     try {
       for (final payment in installments) {
         if (_emiPaymentsBox.containsKey(payment.id)) {
-          throw StateError(
-            'An EMI record with this ID already exists.',
-          );
+          throw StateError('An EMI record with this ID already exists.');
         }
 
-        await _emiPaymentsBox.put(
-          payment.id,
-          payment.toMap(),
-        );
+        await _emiPaymentsBox.put(payment.id, payment.toMap());
 
         writtenIds.add(payment.id);
       }
@@ -727,11 +665,7 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
   }
 
-  DateTime _dateForEmiMonth(
-    DateTime firstDate,
-    int months,
-    int emiDay,
-  ) {
+  DateTime _dateForEmiMonth(DateTime firstDate, int months, int emiDay) {
     final monthIndex = firstDate.month - 1 + months;
     final year = firstDate.year + monthIndex ~/ 12;
     final month = monthIndex % 12 + 1;
@@ -748,17 +682,12 @@ class DatabaseService extends ChangeNotifier {
     final schedule = getLoanEmiPayments(loanId);
     if (schedule.isEmpty) return loan.principal;
 
-    return schedule.fold(
-      0.0,
-      (sum, payment) {
-        final safeAmount =
-            payment.amount.clamp(0.000001, double.infinity);
+    return schedule.fold(0.0, (sum, payment) {
+      final safeAmount = payment.amount.clamp(0.000001, double.infinity);
 
-        return sum +
-            payment.principalComponent *
-                (payment.remainingAmount / safeAmount);
-      },
-    );
+      return sum +
+          payment.principalComponent * (payment.remainingAmount / safeAmount);
+    });
   }
 
   List<EmiPayment> get overdueEmis =>
@@ -766,9 +695,7 @@ class DatabaseService extends ChangeNotifier {
 
   List<EmiPayment> get upcomingEmis =>
       _emiPayments
-          .where(
-            (payment) => !payment.isPaid && !payment.isOverdue,
-          )
+          .where((payment) => !payment.isPaid && !payment.isOverdue)
           .toList()
         ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
@@ -787,9 +714,7 @@ class DatabaseService extends ChangeNotifier {
     _ensureInitialized();
 
     if (!item.amount.isFinite || item.amount <= 0) {
-      throw ArgumentError(
-        'The lent amount must be greater than zero.',
-      );
+      throw ArgumentError('The lent amount must be greater than zero.');
     }
 
     if (getAccount(item.accountId) == null) {
@@ -812,9 +737,7 @@ class DatabaseService extends ChangeNotifier {
       throw StateError('Lending record not found.');
     }
 
-    if (_lentRepayments.any(
-      (repayment) => repayment.moneyLentId == item.id,
-    )) {
+    if (_lentRepayments.any((repayment) => repayment.moneyLentId == item.id)) {
       throw StateError(
         'Cannot edit a lending record after repayments have been added.',
       );
@@ -822,17 +745,14 @@ class DatabaseService extends ChangeNotifier {
 
     await _moneyLentBox.put(item.id, item.toMap());
 
-    final index =
-        _moneyLent.indexWhere((value) => value.id == item.id);
+    final index = _moneyLent.indexWhere((value) => value.id == item.id);
     _moneyLent[index] = item;
     notifyListeners();
   }
 
   double getMoneyLentRepaid(String moneyLentId) {
     return _lentRepayments
-        .where(
-          (repayment) => repayment.moneyLentId == moneyLentId,
-        )
+        .where((repayment) => repayment.moneyLentId == moneyLentId)
         .fold(0.0, (sum, repayment) => sum + repayment.amount);
   }
 
@@ -869,10 +789,7 @@ class DatabaseService extends ChangeNotifier {
       throw StateError('This repayment already exists.');
     }
 
-    await _lentRepaymentsBox.put(
-      repayment.id,
-      repayment.toMap(),
-    );
+    await _lentRepaymentsBox.put(repayment.id, repayment.toMap());
 
     _lentRepayments.add(repayment);
     notifyListeners();
@@ -901,9 +818,7 @@ class DatabaseService extends ChangeNotifier {
   Future<void> deleteMoneyLent(String id) async {
     _ensureInitialized();
 
-    if (_lentRepayments.any(
-      (item) => item.moneyLentId == id,
-    )) {
+    if (_lentRepayments.any((item) => item.moneyLentId == id)) {
       throw StateError(
         'Delete or reverse the repayments before deleting this record.',
       );

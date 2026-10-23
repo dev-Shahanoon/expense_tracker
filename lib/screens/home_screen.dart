@@ -32,9 +32,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showBalances = false;
   bool _showAccountBalances = false;
-  bool _showNetWorth = false;
 
+  // Top overview card
   int _overviewFaceIndex = 0;
+
+  // Lower flip card: Spending → Net Worth → Loans / EMIs
+  int _flipFaceIndex = 0;
+  int _flipTargetFaceIndex = 1;
+  bool _isFlipping = false;
+
   String _chartPeriod = 'Week';
   int _weekOffset = 0;
 
@@ -203,28 +209,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (mounted) setState(() {});
   }
 
-  Future<void> _openSettings() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SettingsScreen(
-          databaseService: _db,
-          themeController: widget.themeController,
-        ),
-      ),
-    );
-    if (mounted) setState(() {});
-  }
+  Future<void> _toggleFlipCard({bool reverse = false}) async {
+    if (_isFlipping) return;
 
-  void _toggleFlipCard() {
-    if (_flipController.isAnimating) return;
+    setState(() {
+      _isFlipping = true;
+      _flipTargetFaceIndex = (_flipFaceIndex + (reverse ? 2 : 1)) % 3;
+    });
 
-    setState(() => _showNetWorth = !_showNetWorth);
+    await _flipController.forward(from: 0);
 
-    if (_showNetWorth) {
-      _flipController.forward();
-    } else {
-      _flipController.reverse();
-    }
+    if (!mounted) return;
+
+    setState(() {
+      _flipFaceIndex = _flipTargetFaceIndex;
+      _isFlipping = false;
+    });
+
+    _flipController.reset();
   }
 
   void _nextOverviewFace({bool reverse = false}) {
@@ -1311,7 +1313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              _flipHint(Icons.flip_rounded, 'Spending'),
+              _flipHint(Icons.flip_rounded, 'Loans / EMIs'),
             ],
           ),
           const SizedBox(height: 20),
@@ -1436,13 +1438,123 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _loansFace() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      padding: const EdgeInsets.all(19),
+      decoration: _decoration(radius: 23),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _iconBox(Icons.payments_rounded, const Color.fromRGBO(32, 201, 181, 1)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Loans & EMIs',
+                      style: TextStyle(
+                        color: _text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Manage your repayments',
+                      style: TextStyle(color: _muted, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              _flipHint(Icons.flip_rounded, 'Spending'),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: _surfaceAlt,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.account_balance_rounded, color: const Color.fromRGBO(32, 201, 181, 1), size: 28),
+                const SizedBox(height: 12),
+                Text(
+                  'Track your loans',
+                  style: TextStyle(
+                    color: _text,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'View loan details, EMIs and repayment information.',
+                  style: TextStyle(color: _muted, fontSize: 12),
+                ),
+                const SizedBox(height: 15),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _openLoans,
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    label: const Text('Open Loans & EMIs'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(32, 201, 181, 1),
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          Center(
+            child: Text(
+              'Tap or swipe to view spending activity',
+              style: TextStyle(color: _muted, fontSize: 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlipFace(int index) {
+    switch (index) {
+      case 0:
+        return _spendingChartFace();
+      case 1:
+        return _netWorthFace();
+      case 2:
+        return _loansFace();
+      default:
+        return _spendingChartFace();
+    }
+  }
+
   Widget _flipCard() {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _toggleFlipCard,
+      onTap: () => _toggleFlipCard(),
       onHorizontalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
-        if (velocity.abs() > 100) _toggleFlipCard();
+
+        if (velocity < -100) {
+          // Swipe left: next face
+          _toggleFlipCard();
+        } else if (velocity > 100) {
+          // Swipe right: previous face
+          _toggleFlipCard(reverse: true);
+        }
       },
       child: SizedBox(
         height: 370,
@@ -1463,7 +1575,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 alignment: Alignment.center,
                 transform: Matrix4.identity()..rotateY(showBack ? math.pi : 0),
                 child: SizedBox.expand(
-                  child: showBack ? _netWorthFace() : _spendingChartFace(),
+                  child: showBack
+                      ? _buildFlipFace(_flipTargetFaceIndex)
+                      : _buildFlipFace(_flipFaceIndex),
                 ),
               ),
             );
@@ -1657,143 +1771,150 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-// ------------------------------------------------------------
-// FLOATING PILL BOTTOM NAVIGATION
-// ------------------------------------------------------------
+  // ------------------------------------------------------------
+  // FLOATING PILL BOTTOM NAVIGATION
+  // ------------------------------------------------------------
 
-Widget _bottomNavigation() {
-  final accent = _dark
-      ? const Color(0xFF35D6C3)
-      : const Color(0xFF087F73);
+  Widget _bottomNavigation() {
+    final accent = _dark ? const Color(0xFF35D6C3) : const Color(0xFF087F73);
 
-  return Container(
-    color: _background,
-    child: SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-      child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 5),
-        decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: BorderRadius.circular(36),
-          border: Border.all(color: _border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(
-                alpha: _dark ? 0.16 : 0.055,
+    return Container(
+      color: _background,
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        child: Container(
+          height: 72,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.circular(36),
+            border: Border.all(color: _border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: _dark ? 0.16 : 0.055),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _navItem(
-                icon: Icons.account_balance_rounded,
-                label: 'Accounts',
-                onTap: _openAccounts,
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _navItem(
+                  icon: Icons.account_balance_rounded,
+                  label: 'Accounts',
+                  onTap: _openAccounts,
+                ),
               ),
-            ),
-            Expanded(
-              child: _navItem(
-                icon: Icons.receipt_long_rounded,
-                label: 'Activity',
-                onTap: _openTransactions,
+              Expanded(
+                child: _navItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Activity',
+                  onTap: _openTransactions,
+                ),
               ),
-            ),
 
-            // Centered pill-shaped Add button
-            Expanded(
-              child: Center(
-                child: SizedBox(
-                  width: 54,
-                  height: 54,
-                  child: Material(
-                    color: accent,
-                    borderRadius: BorderRadius.circular(27),
-                    child: InkWell(
-                      onTap: _openAdd,
+              // Centered pill-shaped Add button
+              Expanded(
+                child: Center(
+                  child: SizedBox(
+                    width: 54,
+                    height: 54,
+                    child: Material(
+                      color: accent,
                       borderRadius: BorderRadius.circular(27),
-                      child: const Center(
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 30,
-                          color: Colors.white,
+                      child: InkWell(
+                        onTap: _openAdd,
+                        borderRadius: BorderRadius.circular(27),
+                        child: const Center(
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 30,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            Expanded(
-              child: _navItem(
-                icon: Icons.analytics_rounded,
-                label: 'Analytics',
-                onTap: _openAnalytics,
+              Expanded(
+                child: _navItem(
+                  icon: Icons.analytics_rounded,
+                  label: 'Analytics',
+                  onTap: _openAnalytics,
+                ),
               ),
-            ),
-            Expanded(
-              child: _navItem(
-                icon: Icons.payments_outlined,
-                label: 'Loans',
-                onTap: _openLoans,
+              Expanded(
+                child: _navItem(
+                  icon: Icons.payments_outlined,
+                  label: 'Loans',
+                  onTap: _openLoans,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget _navItem({
-  required IconData icon,
-  required String label,
-  required VoidCallback onTap,
-}) {
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(28),
-      child: SizedBox.expand(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 21,
-              color: _muted,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: _muted,
-                fontSize: 9,
-                height: 1.1,
-                fontWeight: FontWeight.w600,
+  Widget _navItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: SizedBox.expand(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 21, color: _muted),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: _muted,
+                  fontSize: 9,
+                  height: 1.1,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
   // ------------------------------------------------------------
   // HOME SCREEN
   // ------------------------------------------------------------
+
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(
+          databaseService: _db,
+          themeController: widget.themeController,
+        ),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1834,16 +1955,15 @@ Widget _navItem({
             ),
           ],
         ),
-        
-actions: [
-  IconButton(
-    tooltip: 'Settings',
-    onPressed: _openSettings,
-    icon: Icon(Icons.tune_rounded, color: _text),
-  ),
-  const SizedBox(width: 6),
-],
 
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: _openSettings,
+            icon: Icon(Icons.tune_rounded, color: _text),
+          ),
+          const SizedBox(width: 6),
+        ],
       ),
       body: SafeArea(
         child: RefreshIndicator(

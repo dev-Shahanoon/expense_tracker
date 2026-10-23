@@ -18,7 +18,7 @@ Future<void> main() async {
   await Hive.openBox('app_settings');
 
   final themeController = ThemeController();
-await themeController.init();
+  await themeController.init();
 
   runApp(
     ExpenseTrackerApp(

@@ -1,4 +1,3 @@
-
 class Loan {
   final String id;
   final String name;
@@ -96,9 +95,7 @@ class Loan {
   }
 
   factory Loan.fromMap(Map<String, dynamic> map) {
-    final firstEmiDate = DateTime.parse(
-      map['firstEmiDate'] as String,
-    );
+    final firstEmiDate = DateTime.parse(map['firstEmiDate'] as String);
 
     final storedEmiDay = map['emiDay'];
 
@@ -108,13 +105,12 @@ class Loan {
       lender: map['lender'] as String,
       principal: (map['principal'] as num).toDouble(),
       downPayment: (map['downPayment'] as num?)?.toDouble() ?? 0,
-      annualInterestRate:
-          (map['annualInterestRate'] as num).toDouble(),
+      annualInterestRate: (map['annualInterestRate'] as num).toDouble(),
       tenureMonths: (map['tenureMonths'] as num).toInt(),
       startDate: DateTime.parse(map['startDate'] as String),
       firstEmiDate: firstEmiDate,
-      emiDay: (storedEmiDay as num?)?.toInt() ??
-          (firstEmiDate.day.clamp(1, 28)),
+      emiDay:
+          (storedEmiDay as num?)?.toInt() ?? (firstEmiDate.day.clamp(1, 28)),
       accountId: map['accountId'] as String,
       note: map['note'] as String? ?? '',
     );

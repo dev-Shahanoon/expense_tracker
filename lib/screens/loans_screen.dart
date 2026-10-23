@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../models/loan.dart';
@@ -8,10 +7,7 @@ import '../services/database_service.dart';
 class LoansScreen extends StatefulWidget {
   final DatabaseService databaseService;
 
-  const LoansScreen({
-    super.key,
-    required this.databaseService,
-  });
+  const LoansScreen({super.key, required this.databaseService});
 
   @override
   State<LoansScreen> createState() => _LoansScreenState();
@@ -41,8 +37,7 @@ class _LoansScreenState extends State<LoansScreen> {
   bool _isLoanCompleted(Loan loan) {
     final schedule = databaseService.getLoanEmiPayments(loan.id);
 
-    return schedule.isNotEmpty &&
-        schedule.every((payment) => payment.isPaid);
+    return schedule.isNotEmpty && schedule.every((payment) => payment.isPaid);
   }
 
   Future<void> _confirmDeleteLoan(Loan loan) async {
@@ -184,8 +179,8 @@ class _LoansScreenState extends State<LoansScreen> {
                             ),
                             validator: (value) =>
                                 value == null || value.trim().isEmpty
-                                    ? 'Enter a loan name'
-                                    : null,
+                                ? 'Enter a loan name'
+                                : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
@@ -196,14 +191,13 @@ class _LoansScreenState extends State<LoansScreen> {
                             ),
                             validator: (value) =>
                                 value == null || value.trim().isEmpty
-                                    ? 'Enter the lender'
-                                    : null,
+                                ? 'Enter the lender'
+                                : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: principalController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
@@ -213,8 +207,9 @@ class _LoansScreenState extends State<LoansScreen> {
                               prefixIcon: Icon(Icons.currency_rupee),
                             ),
                             validator: (value) {
-                              final amount =
-                                  double.tryParse(value?.trim() ?? '');
+                              final amount = double.tryParse(
+                                value?.trim() ?? '',
+                              );
                               if (amount == null ||
                                   !amount.isFinite ||
                                   amount <= 0) {
@@ -227,19 +222,18 @@ class _LoansScreenState extends State<LoansScreen> {
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: downPaymentController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
                               labelText: 'Down payment (₹)',
-                              helperText:
-                                  'Enter 0 if no down payment was made',
+                              helperText: 'Enter 0 if no down payment was made',
                               prefixIcon: Icon(Icons.payments_outlined),
                             ),
                             validator: (value) {
-                              final amount =
-                                  double.tryParse(value?.trim() ?? '');
+                              final amount = double.tryParse(
+                                value?.trim() ?? '',
+                              );
                               if (amount == null ||
                                   !amount.isFinite ||
                                   amount < 0) {
@@ -252,8 +246,7 @@ class _LoansScreenState extends State<LoansScreen> {
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: rateController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
@@ -261,11 +254,8 @@ class _LoansScreenState extends State<LoansScreen> {
                               prefixIcon: Icon(Icons.percent),
                             ),
                             validator: (value) {
-                              final rate =
-                                  double.tryParse(value?.trim() ?? '');
-                              if (rate == null ||
-                                  !rate.isFinite ||
-                                  rate < 0) {
+                              final rate = double.tryParse(value?.trim() ?? '');
+                              if (rate == null || !rate.isFinite || rate < 0) {
                                 return 'Enter a valid interest rate';
                               }
                               return null;
@@ -281,8 +271,7 @@ class _LoansScreenState extends State<LoansScreen> {
                               prefixIcon: Icon(Icons.calendar_month),
                             ),
                             validator: (value) {
-                              final months =
-                                  int.tryParse(value?.trim() ?? '');
+                              final months = int.tryParse(value?.trim() ?? '');
                               if (months == null || months <= 0) {
                                 return 'Enter months greater than zero';
                               }
@@ -296,8 +285,7 @@ class _LoansScreenState extends State<LoansScreen> {
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'EMI payment account',
-                              prefixIcon:
-                                  Icon(Icons.account_balance_wallet),
+                              prefixIcon: Icon(Icons.account_balance_wallet),
                             ),
                             items: databaseService.accounts
                                 .map(
@@ -339,17 +327,14 @@ class _LoansScreenState extends State<LoansScreen> {
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Recurring EMI day',
-                              helperText:
-                                  'Applies from the second EMI onwards',
+                              helperText: 'Applies from the second EMI onwards',
                               prefixIcon: Icon(Icons.event_repeat),
                             ),
                             items: List.generate(
                               28,
                               (index) => DropdownMenuItem<int>(
                                 value: index + 1,
-                                child: Text(
-                                  'Day ${index + 1} of each month',
-                                ),
+                                child: Text('Day ${index + 1} of each month'),
                               ),
                             ),
                             onChanged: isSaving
@@ -385,10 +370,8 @@ class _LoansScreenState extends State<LoansScreen> {
                                     principalController.text.trim(),
                                   ) ??
                                   0,
-                              double.tryParse(rateController.text.trim()) ??
-                                  0,
-                              int.tryParse(tenureController.text.trim()) ??
-                                  0,
+                              double.tryParse(rateController.text.trim()) ?? 0,
+                              int.tryParse(tenureController.text.trim()) ?? 0,
                               double.tryParse(
                                     downPaymentController.text.trim(),
                                   ) ??
@@ -421,10 +404,12 @@ class _LoansScreenState extends State<LoansScreen> {
                             final downPayment = double.tryParse(
                               downPaymentController.text.trim(),
                             );
-                            final rate =
-                                double.tryParse(rateController.text.trim());
-                            final tenure =
-                                int.tryParse(tenureController.text.trim());
+                            final rate = double.tryParse(
+                              rateController.text.trim(),
+                            );
+                            final tenure = int.tryParse(
+                              tenureController.text.trim(),
+                            );
 
                             if (principal == null ||
                                 !principal.isFinite ||
@@ -441,8 +426,7 @@ class _LoansScreenState extends State<LoansScreen> {
                             }
 
                             final loan = Loan(
-                              id: DateTime.now()
-                                  .microsecondsSinceEpoch
+                              id: DateTime.now().microsecondsSinceEpoch
                                   .toString(),
                               name: nameController.text.trim(),
                               lender: lenderController.text.trim(),
@@ -546,9 +530,9 @@ class _LoansScreenState extends State<LoansScreen> {
     final emi = monthlyRate == 0
         ? principal / tenure
         : principal *
-            monthlyRate *
-            _power(1 + monthlyRate, tenure) /
-            (_power(1 + monthlyRate, tenure) - 1);
+              monthlyRate *
+              _power(1 + monthlyRate, tenure) /
+              (_power(1 + monthlyRate, tenure) - 1);
 
     return Card(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -713,16 +697,14 @@ class _LoansScreenState extends State<LoansScreen> {
                         TextFormField(
                           controller: amountController,
                           autofocus: true,
-                          keyboardType:
-                              const TextInputType.numberWithOptions(
+                          keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           decoration: const InputDecoration(
                             labelText: 'Payment amount (₹)',
                           ),
                           validator: (value) {
-                            final amount =
-                                double.tryParse(value?.trim() ?? '');
+                            final amount = double.tryParse(value?.trim() ?? '');
                             if (amount == null ||
                                 !amount.isFinite ||
                                 amount <= 0) {
@@ -828,16 +810,16 @@ class _LoansScreenState extends State<LoansScreen> {
     final status = payment.isPaid
         ? 'Paid'
         : payment.isOverdue
-            ? 'Overdue'
-            : payment.paidAmount > 0
-                ? 'Part-paid'
-                : 'Pending';
+        ? 'Overdue'
+        : payment.paidAmount > 0
+        ? 'Part-paid'
+        : 'Pending';
 
     final color = payment.isPaid
         ? Colors.green
         : payment.isOverdue
-            ? Colors.red
-            : Theme.of(context).colorScheme.primary;
+        ? Colors.red
+        : Theme.of(context).colorScheme.primary;
 
     return ListTile(
       leading: CircleAvatar(child: Text('${payment.installmentNumber}')),
@@ -882,10 +864,10 @@ class _LoansScreenState extends State<LoansScreen> {
   @override
   Widget build(BuildContext context) {
     final loans = databaseService.loans;
-    final pendingLoans =
-        loans.where((loan) => !_isLoanCompleted(loan)).toList();
-    final completedLoans =
-        loans.where(_isLoanCompleted).toList();
+    final pendingLoans = loans
+        .where((loan) => !_isLoanCompleted(loan))
+        .toList();
+    final completedLoans = loans.where(_isLoanCompleted).toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Loans & EMIs')),
@@ -942,9 +924,9 @@ class _LoansScreenState extends State<LoansScreen> {
                     Text(
                       '${pendingLoans.length}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -957,9 +939,7 @@ class _LoansScreenState extends State<LoansScreen> {
                         children: [
                           Icon(Icons.check_circle_outline, color: Colors.green),
                           SizedBox(width: 12),
-                          Expanded(
-                            child: Text('No pending loans. Great job!'),
-                          ),
+                          Expanded(child: Text('No pending loans. Great job!')),
                         ],
                       ),
                     ),
@@ -1011,19 +991,18 @@ class _LoansScreenState extends State<LoansScreen> {
   }
 
   Widget _summaryCard(List<Loan> loans) {
-    final totalPrincipal =
-        loans.fold(0.0, (sum, loan) => sum + loan.principal);
-    final totalDownPayment =
-        loans.fold(0.0, (sum, loan) => sum + loan.downPayment);
-    final monthlyEmis =
-        loans.fold(0.0, (sum, loan) => sum + loan.monthlyEmi);
+    final totalPrincipal = loans.fold(0.0, (sum, loan) => sum + loan.principal);
+    final totalDownPayment = loans.fold(
+      0.0,
+      (sum, loan) => sum + loan.downPayment,
+    );
+    final monthlyEmis = loans.fold(0.0, (sum, loan) => sum + loan.monthlyEmi);
 
     final allPayments = databaseService.emiPayments.where(
       (payment) => loans.any((loan) => loan.id == payment.loanId),
     );
 
-    final pendingCount =
-        allPayments.where((payment) => !payment.isPaid).length;
+    final pendingCount = allPayments.where((payment) => !payment.isPaid).length;
     final totalEmiPending = allPayments.fold(
       0.0,
       (sum, payment) => sum + payment.remainingAmount,
@@ -1077,14 +1056,9 @@ class _LoansScreenState extends State<LoansScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _summaryValue(
-                    'Unpaid installments',
-                    '$pendingCount',
-                  ),
+                  child: _summaryValue('Unpaid installments', '$pendingCount'),
                 ),
-                Expanded(
-                  child: _summaryValue('Loans', '${loans.length}'),
-                ),
+                Expanded(child: _summaryValue('Loans', '${loans.length}')),
               ],
             ),
           ],
@@ -1101,10 +1075,9 @@ class _LoansScreenState extends State<LoansScreen> {
         const SizedBox(height: 5),
         Text(
           value,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -1114,8 +1087,7 @@ class _LoansScreenState extends State<LoansScreen> {
     final schedule = databaseService.getLoanEmiPayments(loan.id);
     final paidCount = schedule.where((payment) => payment.isPaid).length;
     final pendingCount = schedule.where((payment) => !payment.isPaid).length;
-    final progress =
-        schedule.isEmpty ? 0.0 : paidCount / schedule.length;
+    final progress = schedule.isEmpty ? 0.0 : paidCount / schedule.length;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1129,9 +1101,7 @@ class _LoansScreenState extends State<LoansScreen> {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
-                    child: Icon(Icons.account_balance),
-                  ),
+                  const CircleAvatar(child: Icon(Icons.account_balance)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -1232,9 +1202,9 @@ class _LoansScreenState extends State<LoansScreen> {
                   Text(
                     'View schedule',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
